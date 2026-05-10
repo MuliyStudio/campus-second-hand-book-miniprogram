@@ -1,0 +1,61 @@
+<!-- pages/my-downloads/my-downloads.wxml -->
+<view class="container">
+  <!-- 顶部导航 -->
+  <view class="header">
+    <view class="header-title">我的下载</view>
+  </view>
+
+  <!-- 内容区域 -->
+  <view class="content-section">
+    <view class="loading" wx:if="{{loading}}">
+      <text>加载中...</text>
+    </view>
+
+    <view class="empty" wx:if="{{!loading && downloads.length === 0}}">
+      <view class="empty-icon">📁</view>
+      <view class="empty-text">暂无下载记录</view>
+      <view class="empty-btn" bindtap="goToDiscover">
+        <text>去浏览资料</text>
+      </view>
+    </view>
+
+    <view class="downloads-list" wx:if="{{!loading && downloads.length > 0}}">
+      <block wx:for="{{downloads}}" wx:key="_id">
+        <view class="download-item" bindtap="goToDetail" data-id="{{item.materialId}}" data-type="material">
+        <view class="item-header">
+          <view class="item-title">{{item.title}}</view>
+          <view class="item-type">pdf</view>
+        </view>
+          
+          <view class="item-info">
+            <view class="info-row">
+              <text class="label">大小:</text>
+              <text class="value">{{item.fileSize}}</text>
+            </view>
+            <view class="info-row">
+              <text class="label">上传者:</text>
+              <text class="value">{{item.uploaderName}}</text>
+            </view>
+            <view class="info-row">
+              <text class="label">下载时间:</text>
+              <text class="value">{{item.downloadTime}}</text>
+            </view>
+          </view>
+          
+          <view class="item-footer">
+            <view class="price" wx:if="{{item.price > 0}}">¥{{item.price}}</view>
+            <view class="price free" wx:else>免费</view>
+            <view class="actions">
+              <view class="action-btn download" catchtap="downloadMaterial" data-id="{{item._id}}">
+                <text>再次下载</text>
+              </view>
+              <view class="action-btn delete" catchtap="deleteDownload" data-id="{{item._id}}">
+                <text>删除</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
+</view>

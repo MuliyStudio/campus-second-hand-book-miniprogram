@@ -1,0 +1,133 @@
+<view class="container">
+  <scroll-view 
+    scroll-y 
+    class="scroll-view" 
+    scroll-with-animation
+    refresher-enabled="{{true}}"
+    refresher-triggered="{{isRefreshing}}"
+    bindrefresherrefresh="onRefresh"
+  >
+    <view class="search-header">
+      <view class="back-btn" bindtap="goBack">
+        <text class="back-icon">‹</text>
+      </view>
+      <view class="search-container" bindtap="goToSearch">
+        <view class="search-box">
+          <view class="search-icon">🔍</view>
+          <text class="search-text">搜索书名、课程、专业...</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <scroll-view 
+        scroll-x 
+        class="college-scroll"
+        scroll-with-animation
+        enable-flex
+      >
+        <view class="college-list">
+          <block wx:for="{{colleges}}" wx:key="id">
+            <view 
+              class="college-item {{selectedCollege.id === item.id ? 'active' : ''}}"
+              bindtap="selectCollege"
+              data-id="{{item.id}}"
+            >
+              <text class="college-name">{{item.name}}</text>
+            </view>
+          </block>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view class="section">
+      <scroll-view 
+        scroll-x 
+        class="major-scroll"
+        scroll-with-animation
+        enable-flex
+      >
+        <view class="major-list">
+          <block wx:for="{{selectedCollege.majors}}" wx:key="id">
+            <view 
+              class="major-item {{selectedMajor.id === item.id ? 'active' : ''}}"
+              bindtap="selectMajor"
+              data-id="{{item.id}}"
+            >
+              <text class="major-name">{{item.name}}</text>
+            </view>
+          </block>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view class="section">
+      <view class="section-header">
+        <text class="section-title">{{selectedMajor.id === 'all' ? selectedCollege.name + ' 全部书籍' : selectedCollege.name + ' - ' + selectedMajor.name}}</text>
+        <view class="section-actions">
+          <view class="refresh-btn" bindtap="onRefresh">
+          </view>
+        </view>
+      </view>
+      
+      <view class="books-grid">
+        <block wx:for="{{filteredBooks}}" wx:key="_id">
+          <view class="book-item" bindtap="goToBookDetail" data-id="{{item._id}}">
+            <view class="book-image-container">
+              <image src="{{item.coverUrl}}" class="book-image" mode="aspectFill"></image>
+              <view class="book-status {{item.status}}">{{item.statusText || (item.status === 'reserved' ? '预定中' : '在售')}}</view>
+              <view class="book-condition {{item.condition >= 9 ? 'condition-new' : item.condition >= 7 ? 'condition-good' : 'condition-normal'}}">{{item.conditionText || '未知'}}</view>
+            </view>
+            
+            <view class="book-info">
+              <view class="book-title-row">
+                <text class="book-title">
+                  {{item.title.length <= 10 ? item.title : item.title.substring(0, 10) + '...'}}
+                </text>
+              </view>
+              
+              <view class="book-price-section">
+                <text class="book-price">¥{{item.price}}</text>
+                <text class="book-original-price" wx:if="{{item.originalPrice}}">¥{{item.originalPrice}}</text>
+              </view>
+              
+              <view class="seller-info">
+                <image class="seller-avatar" src="{{item.sellerAvatar}}" mode="aspectFill"></image>
+                <view class="seller-details">
+                  <text class="seller-name">{{item.sellerName || '匿名用户'}}</text>
+                  <view class="seller-location">
+                    <text class="location-icon">📍</text>
+                    <text class="location-text">{{item.sellerDorm || '未知宿舍'}}</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </block>
+      </view>
+      
+      <view class="load-more" wx:if="{{hasMore && filteredBooks.length > 0}}" bindtap="loadMoreBooks">
+        <text class="load-text">{{isLoading ? '加载中...' : '加载更多'}}</text>
+        <view class="load-icon" wx:if="{{!isLoading}}">⬇️</view>
+      </view>
+      
+      <view class="no-more" wx:if="{{!hasMore && filteredBooks.length > 0}}">
+        <text>没有更多了~</text>
+      </view>
+      
+      <view class="no-data" wx:if="{{filteredBooks.length === 0 && !isLoading}}">
+        <view class="empty-icon">📚</view>
+        <text class="empty-text">暂无相关书籍</text>
+        <text class="empty-tip">试试其他分类吧</text>
+        <button class="publish-btn" bindtap="goToPublishBook">去发布一本</button>
+      </view>
+      
+      <view class="loading-container" wx:if="{{isLoading && filteredBooks.length === 0}}">
+        <view class="loading-spinner"></view>
+        <text class="loading-text">加载中...</text>
+      </view>
+    </view>
+
+    <view class="safe-area"></view>
+  </scroll-view>
+</view>

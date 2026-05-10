@@ -1,0 +1,171 @@
+<view class="container">
+  <!-- 顶部导航栏 -->
+  <view class="header">
+    <view class="nav-back" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="nav-title">管理发布</view>
+    <view class="nav-right">
+      <view class="nav-btn" bindtap="refreshData">
+        <text class="nav-text">刷新</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 筛选标签 -->
+  <view class="filter-section">
+    <scroll-view scroll-x="true" class="filter-tabs" scroll-with-animation="{{true}}" show-scrollbar="{{false}}">
+      <view 
+        class="filter-tab {{activeFilter === 'all' ? 'active' : ''}}" 
+        data-type="all" 
+        bindtap="changeFilter"
+      >
+        全部
+      </view>
+      <view 
+        class="filter-tab {{activeFilter === 'post' ? 'active' : ''}}" 
+        data-type="post" 
+        bindtap="changeFilter"
+      >
+        帖子
+      </view>
+      <view 
+        class="filter-tab {{activeFilter === 'book' ? 'active' : ''}}" 
+        data-type="book" 
+        bindtap="changeFilter"
+      >
+        书籍
+      </view>
+      <view 
+        class="filter-tab {{activeFilter === 'material' ? 'active' : ''}}" 
+        data-type="material" 
+        bindtap="changeFilter"
+      >
+        资料
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 搜索栏 -->
+  <view class="search-section">
+    <view class="search-bar">
+      <text class="search-icon">🔍</text>
+      <input 
+        class="search-input" 
+        placeholder="搜索标题、作者或内容" 
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        bindconfirm="searchContent"
+      />
+      <view class="search-clear" wx:if="{{searchKeyword}}" bindtap="clearSearch">
+        <text>×</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 数据统计 -->
+  <view class="stats-section">
+    <view class="stat-item">
+      <text class="stat-value">{{totalItems}}</text>
+      <text class="stat-label">总发布</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-value">{{pendingItems}}</text>
+      <text class="stat-label">待审核</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-value">{{publishedItems}}</text>
+      <text class="stat-label">已发布</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-value">{{rejectedItems}}</text>
+      <text class="stat-label">已拒绝</text>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{!isLoading && filteredItems.length === 0}}">
+    <view class="empty-content">
+      <text class="empty-icon">📋</text>
+      <text class="empty-title">暂无发布内容</text>
+      <text class="empty-subtitle">用户还没有发布任何内容</text>
+    </view>
+  </view>
+
+  <!-- 内容列表 -->
+  <scroll-view 
+    scroll-y="true" 
+    class="content-list" 
+    wx:if="{{filteredItems.length > 0}}"
+    refresher-enabled="{{true}}"
+    refresher-triggered="{{isRefreshing}}"
+    bindrefresherrefresh="onRefresh"
+    bindscrolltolower="loadMore"
+  >
+    <!-- 下拉刷新 -->
+    <view class="refresh-area" wx:if="{{isRefreshing}}">
+      <view class="loading-spinner"></view>
+      <text>正在刷新...</text>
+    </view>
+
+    <!-- 内容项 -->
+    <view 
+      class="content-item {{item.status === 'pending' ? 'pending' : item.status === 'rejected' ? 'rejected' : ''}}" 
+      wx:for="{{filteredItems}}" 
+      wx:key="_id"
+      data-id="{{item._id}}"
+      data-type="{{item.type}}"
+    >
+      <!-- 内容类型标签 -->
+      <view class="content-type {{item.type}}">
+        {{item.type === 'post' ? '帖子' : item.type === 'book' ? '书籍' : '资料'}}
+      </view>
+
+      <!-- 内容主体 -->
+      <view class="content-body" bindtap="viewContentDetail">
+        <!-- 标题 -->
+        <view class="content-title">{{item.title}}</view>
+        
+        <!-- 作者信息 -->
+        <view class="content-author">
+          <image src="{{item.author.avatarUrl || 'https://via.placeholder.com/100x100/667eea/ffffff?text=用户'}}" class="author-avatar" />
+          <text class="author-name">{{item.author.nickname || '匿名用户'}}</text>
+          <text class="content-time">{{formatTime(item.createTime)}}</text>
+        </view>
+
+        <!-- 内容预览 -->
+        <view class="content-preview" wx:if="{{item.content}}">
+          {{item.content.length > 100 ? item.content.substring(0, 100) + '...' : item.content}}
+        </view>
+
+        <!-- 图片预览 -->
+        <view class="content-images" wx:if="{{item.images && item.images.length > 0}}">
+          <scroll-view scroll-x="true" show-scrollbar="{{false}}">
+            <block wx:for="{{item.images.slice(0, 3)}}" wx:key="*this">
+              <image src="{{item}}" class="preview-image" mode="aspectFill" />
+            </block>
+            <view class="image-count" wx:if="{{item.images.length > 3}}">
+              +{{item.images.length - 3}}
+            </view>
+          </scroll-view>
+        </view>
+
+        <!-- 统计信息 -->
+        <view class="content-stats" wx:if="{{item.type === 'post'}}">
+          <view class="stat-item">
+            <text class="stat-icon">❤️</text>
+            <text>{{item.likeCount || 0}}</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-icon">💬</text>
+            <text>{{item.commentCount || 0}}</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-icon">👁️</text>
+            <text>{{item.viewCount || 0}}</text>
+          </view>
+        </view>
+
+        <!-- 状态标签 -->
+        <view class="status-badge {{item.status}}">
+          {{item.status

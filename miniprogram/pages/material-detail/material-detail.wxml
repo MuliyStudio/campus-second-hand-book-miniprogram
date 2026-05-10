@@ -1,0 +1,130 @@
+<!-- pages/material-detail/material-detail.wxml -->
+<view class="container">
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{isLoading && !materialInfo}}">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <view class="material-detail" wx:else>
+    <!-- 返回按钮 -->
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-icon">←</text>
+    </view>
+
+    <!-- 资料基本信息 -->
+    <scroll-view 
+      scroll-y="true" 
+      class="content-area" 
+      scroll-top="0"
+      enable-back-to-top
+    >
+      <!-- 资料标题和价格 -->
+      <view class="material-header">
+        <text class="material-title">{{materialInfo.title}}</text>
+        <text class="material-price" wx:if="{{materialInfo.price > 0}}">¥{{materialInfo.price}}</text>
+        <text class="material-price free" wx:else>免费</text>
+      </view>
+
+      <!-- 资料元信息 -->
+      <view class="material-meta">
+        <view class="meta-item">
+          <text class="meta-label">类型:</text>
+          <text class="meta-value">pdf</text>
+        </view>
+        <view class="meta-item">
+          <text class="meta-label">大小:</text>
+          <text class="meta-value">{{materialInfo.size}}</text>
+        </view>
+        <view class="meta-item">
+          <text class="meta-label">下载:</text>
+          <text class="meta-value">{{materialInfo.downloads}}次</text>
+        </view>
+        <view class="meta-item">
+          <text class="meta-label">上传:</text>
+          <text class="meta-value">{{materialInfo.uploadTime}}</text>
+        </view>
+      </view>
+
+      <!-- 资料标签 -->
+      <view class="material-tags">
+        <view class="material-tag college">
+          <text class="tag-text">{{materialInfo.college}}</text>
+        </view>
+        <view class="material-tag major" wx:if="{{materialInfo.major}}">
+          <text class="tag-text">{{materialInfo.major}}</text>
+        </view>
+      </view>
+
+      <!-- 资料描述 -->
+      <view class="description-card">
+        <text class="description-title">资料描述</text>
+        <text class="description-content">{{materialInfo.description || '无'}}</text>
+      </view>
+
+      <!-- 在线预览 -->
+      <view class="preview-card" wx:if="{{materialInfo.previewFileId || materialInfo.previewFileUrl || materialInfo.fileId || materialInfo.fileUrl}}">
+        <text class="section-title">在线预览</text>
+        <view class="preview-item" bindtap="previewMaterial">
+          <view class="preview-icon">📄</view>
+          <text class="preview-text">点击预览首图</text>
+        </view>
+      </view>
+
+      <!-- 上传者信息 -->
+      <view class="uploader-card">
+        <text class="section-title">上传者信息</text>
+        <view class="uploader-info" bindtap="goToUserProfile">
+          <image src="{{materialInfo.uploaderAvatar}}" class="uploader-avatar"></image>
+          <view class="uploader-details">
+            <text class="uploader-name">{{materialInfo.uploaderName}}</text>
+            <text class="uploader-college">{{materialInfo.uploaderCollege}}</text>
+            <text class="uploader-major">{{materialInfo.uploaderMajor}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 底部安全空间 -->
+      <view class="bottom-safe-area"></view>
+    </scroll-view>
+
+    <!-- 底部操作栏 -->
+    <view class="action-bar">
+      <view class="action-buttons">
+        <!-- 收藏按钮 -->
+        <view class="action-btn favorite {{isFavorite ? 'active' : ''}}" bindtap="toggleFavorite">
+          <text class="btn-icon">{{isFavorite ? '❤️' : '🤍'}}</text>
+          <text class="btn-text">{{isFavorite ? '已收藏' : '收藏'}}</text>
+        </view>
+        
+        <!-- 私信按钮 -->
+        <view class="action-btn message" bindtap="sendMessage">
+          <text class="btn-icon">💬</text>
+          <text class="btn-text">私信</text>
+        </view>
+        
+        <!-- 举报按钮 -->
+        <view class="action-btn report" bindtap="reportMaterial">
+          <text class="btn-icon">⚠️</text>
+          <text class="btn-text">举报</text>
+        </view>
+        
+
+        
+        <!-- 下载按钮 - 未购买的非发布者显示 -->
+        <view class="action-btn download" bindtap="downloadMaterial" wx:if="{{!isOwner && !hasPurchased}}">
+          <text class="download-text">{{isDownloading ? '下载中...' : (materialInfo.price > 0 ? '付费下载' : '立即下载')}}</text>
+        </view>
+
+        <!-- 立即下载按钮 - 已购买的非发布者显示 -->
+        <view class="action-btn download primary" bindtap="downloadPurchasedMaterial" wx:if="{{!isOwner && hasPurchased}}">
+          <text class="download-text">立即下载</text>
+        </view>
+        
+        <!-- 下架按钮 - 发布者显示 -->
+        <view class="action-btn offline" bindtap="toggleMaterialOffline" wx:if="{{isOwner}}">
+          <text class="btn-text">{{materialInfo.status === 'offline' ? '上架' : '下架'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

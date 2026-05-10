@@ -1,0 +1,4 @@
+<!-- pages/my-favorites/my-favorites.wxml -->
+<view class="container">
+  <text>我的收藏</text>
+</view>

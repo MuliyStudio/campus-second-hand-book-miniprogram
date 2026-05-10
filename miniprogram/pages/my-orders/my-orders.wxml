@@ -1,0 +1,455 @@
+<!-- pages/my-orders/my-orders.wxml -->
+<view class="container">
+  <!-- 顶部导航 -->
+  <view class="header">
+    <view class="header-top">
+      <view class="header-title">我的交易</view>
+      <view class="search-icon" bindtap="toggleSearch">
+        <text>🔍</text>
+      </view>
+    </view>
+    
+    <!-- 搜索框 -->
+    <view class="search-bar" wx:if="{{showSearch}}">
+      <view class="search-input-wrapper">
+        <input 
+          class="search-input" 
+          placeholder="搜索订单标题" 
+          value="{{searchKeyword}}"
+          bindinput="onSearchInput"
+          confirm-type="search"
+          bindconfirm="searchOrders"
+        />
+        <view class="search-btn" bindtap="searchOrders">
+          <text>搜索</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 类型切换 -->
+  <view class="type-tabs">
+    <view 
+      class="tab-item {{activeType === 'buy' ? 'active' : ''}}" 
+      bindtap="switchType" 
+      data-type="buy"
+    >
+      <text>我买到的</text>
+    </view>
+    <view 
+      class="tab-item {{activeType === 'sell' ? 'active' : ''}}" 
+      bindtap="switchType" 
+      data-type="sell"
+    >
+      <text>我卖出的</text>
+    </view>
+  </view>
+
+  <!-- 商品类型切换 -->
+  <view class="category-tabs">
+    <view 
+      class="category-item {{activeCategory === 'book' ? 'active' : ''}}" 
+      bindtap="switchCategory" 
+      data-category="book"
+    >
+      <text>二手书籍</text>
+    </view>
+    <view 
+      class="category-item {{activeCategory === 'material' ? 'active' : ''}}" 
+      bindtap="switchCategory" 
+      data-category="material"
+    >
+      <text>学习资料</text>
+    </view>
+  </view>
+
+  <!-- 状态筛选 -->
+  <view class="status-tabs">
+    <view 
+      class="status-item {{activeStatus === 'all' ? 'active' : ''}}" 
+      bindtap="switchStatus" 
+      data-status="all"
+    >
+      <text>全部</text>
+    </view>
+    <!-- 仅书籍分类显示其他状态筛选 -->
+    <block wx:if="{{activeCategory === 'book'}}">
+      <view
+        class="status-item {{activeStatus === 'pending_payment' ? 'active' : ''}}"
+        bindtap="switchStatus"
+        data-status="pending_payment"
+      >
+        <text>待付款</text>
+      </view>
+      <view
+        class="status-item {{activeStatus === 'pending_processing' ? 'active' : ''}}"
+        bindtap="switchStatus"
+        data-status="pending_processing"
+      >
+        <text>待处理</text>
+      </view>
+      <view
+        class="status-item {{activeStatus === 'processing' ? 'active' : ''}}"
+        bindtap="switchStatus"
+        data-status="processing"
+      >
+        <text>处理中</text>
+      </view>
+      <view
+        class="status-item {{activeStatus === 'completed' ? 'active' : ''}}"
+        bindtap="switchStatus"
+        data-status="completed"
+      >
+        <text>已完成</text>
+      </view>
+      <view
+        class="status-item {{activeStatus === 'cancelled' ? 'active' : ''}}"
+        bindtap="switchStatus"
+        data-status="cancelled"
+      >
+        <text>已取消</text>
+      </view>
+    </block>
+  </view>
+
+  <!-- 内容区域 -->
+  <view class="content-section">
+    <!-- 加载状态 -->
+    <view class="loading" wx:if="{{loading}}">
+      <view class="loading-spinner"></view>
+      <text>加载中...</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty" wx:if="{{!loading && items.length === 0}}">
+      <view class="empty-content">
+        <view class="empty-illustration">
+          <view class="empty-bg-circle"></view>
+          <view class="empty-icon">{{activeCategory === 'book' ? '📚' : '📁'}}</view>
+        </view>
+        <view class="empty-text">{{getEmptyText()}}</view>
+        <view class="empty-subtext">去浏览商品，发现更多精彩内容</view>
+        <view class="empty-btn" bindtap="goToDiscover">
+          <text class="btn-icon">🛍️</text>
+          <text>去逛逛</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 订单列表 -->
+    <view class="items-list" wx:if="{{!loading && items.length > 0}}">
+      <block wx:for="{{items}}" wx:key="_id">
+        <!-- 书籍订单 -->
+        <view class="item-card" wx:if="{{activeCategory === 'book'}}">
+          <view class="card-header">
+            <view class="order-id">订单号：{{item.orderId}}</view>
+            <view class="order-date">{{formatDate(item.createTime)}}</view>
+          </view>
+          
+          <view class="card-content">
+            <view class="item-header" bindtap="goToDetail" data-id="{{item._id}}" data-type="book">
+              <view class="item-title">{{item.title}}</view>
+              <view class="status-tag" style="background-color: {{getStatusColor(item.status)}}">
+                {{item.statusText || getStatusText(item.status, item)}}
+              </view>
+            </view>
+
+            <!-- 付款提示（仅待付款订单） -->
+            <view class="payment-tip" wx:if="{{item.status === 'pending_payment'}}">
+              <text class="tip-icon">⏰</text>
+              <text class="tip-text">请在30分钟内完成付款，超时将自动取消订单</text>
+            </view>
+            
+            <view class="item-info" bindtap="goToDetail" data-id="{{item._id}}" data-type="book">
+              <view class="info-row">
+                <text class="label">作者:</text>
+                <text class="value">{{item.author}}</text>
+              </view>
+              <view class="info-row">
+                <text class="label">新旧:</text>
+                <text class="value">{{item.condition}}分 {{item.conditionText}}</text>
+              </view>
+              <view class="info-row">
+                <text class="label">{{activeType === 'buy' ? '卖家' : '买家'}}:</text>
+                <text class="value">{{activeType === 'buy' ? item.sellerName : item.buyerName}}</text>
+              </view>
+              <view class="info-row" wx:if="{{(activeType === 'buy' && item.sellerCampus) || (activeType === 'sell' && item.buyerCampus)}}">
+                <text class="label">校区:</text>
+                <text class="value">{{activeType === 'buy' ? item.sellerCampus : item.buyerCampus}}</text>
+              </view>
+              <view class="info-row" wx:if="{{(activeType === 'buy' && item.sellerDorm) || (activeType === 'sell' && item.buyerDorm)}}">
+                <text class="label">楼栋:</text>
+                <text class="value">{{activeType === 'buy' ? item.sellerDorm : item.buyerDorm}}</text>
+              </view>
+            </view>
+            
+            <view class="item-footer">
+              <view class="price">¥{{item.price}}</view>
+              <view class="actions">
+                <!-- 待处理状态 -->
+                <block wx:if="{{item.status === 'pending' || item.status === 'pending_processing'}}">
+                  <!-- 买家可以取消订单，但 processing 状态不能取消 -->
+                  <view
+                    class="action-btn secondary"
+                    bindtap="handleAction"
+                    data-id="{{item._id}}"
+                    data-action="cancel"
+                    wx:if="{{activeType === 'buy' && item.status !== 'processing'}}"
+                  >
+                    <text>取消订单</text>
+                  </view>
+                  <view
+                    class="action-btn contact"
+                    bindtap="contactUser"
+                    data-id="{{item._id}}"
+                    data-type="{{activeType === 'buy' ? 'seller' : 'buyer'}}"
+                  >
+                    <text>联系对方</text>
+                  </view>
+                  <!-- 买家确认已处理按钮 -->
+                  <view
+                    class="action-btn primary"
+                    bindtap="buyerConfirmProcessed"
+                    data-id="{{item._id}}"
+                    wx:if="{{item.status === 'pending_processing' && activeType === 'buy'}}"
+                  >
+                    <text>确认已处理</text>
+                  </view>
+                  <!-- 卖家确认已处理按钮 -->
+                  <view
+                    class="action-btn primary"
+                    bindtap="sellerConfirmProcessed"
+                    data-id="{{item._id}}"
+                    wx:if="{{item.status === 'pending_processing' && activeType === 'sell'}}"
+                  >
+                    <text>确认已处理</text>
+                  </view>
+                </block>
+
+                <!-- 处理中状态 -->
+                <block wx:elif="{{item.status === 'processing'}}">
+                  <!-- 如果卖家已确认，买家可以点击确认已完成 -->
+                  <view
+                    class="action-btn primary"
+                    bindtap="sellerConfirmCompleted"
+                    data-id="{{item._id}}"
+                    wx:if="{{activeType === 'buy' && item.sellerProcessed}}"
+                  >
+                    <text>确认已完成</text>
+                  </view>
+                  <!-- 如果买家已确认，卖家可以点击确认已完成 -->
+                  <view
+                    class="action-btn primary"
+                    bindtap="sellerConfirmCompleted"
+                    data-id="{{item._id}}"
+                    wx:if="{{activeType === 'sell' && item.buyerProcessed}}"
+                  >
+                    <text>确认已完成</text>
+                  </view>
+                  <view
+                    class="action-btn contact"
+                    bindtap="contactUser"
+                    data-id="{{item._id}}"
+                    data-type="{{activeType === 'buy' ? 'seller' : 'buyer'}}"
+                  >
+                    <text>联系对方</text>
+                  </view>
+                </block>
+
+                <!-- 待付款状态 -->
+                <block wx:elif="{{item.status === 'pending_payment'}}">
+                  <view
+                    class="action-btn pay"
+                    bindtap="handleAction"
+                    data-id="{{item._id}}"
+                    data-action="pay"
+                    wx:if="{{activeType === 'buy'}}"
+                  >
+                    <text>去付款</text>
+                  </view>
+                  <view
+                    class="action-btn secondary"
+                    bindtap="handleAction"
+                    data-id="{{item._id}}"
+                    data-action="cancel"
+                  >
+                    <text>取消订单</text>
+                  </view>
+                  <view
+                    class="action-btn contact"
+                    bindtap="contactUser"
+                    data-id="{{item._id}}"
+                    data-type="{{activeType === 'buy' ? 'seller' : 'buyer'}}"
+                  >
+                    <text>联系对方</text>
+                  </view>
+                </block>
+
+                <!-- 其他状态 -->
+                <block wx:else>
+                  <view
+                    class="action-btn delete"
+                    bindtap="deleteOrder"
+                    data-id="{{item._id}}"
+                    wx:if="{{item.status === 'cancelled'}}"
+                  >
+                    <text>删除订单</text>
+                  </view>
+                  <view
+                    class="action-btn {{getActionBtnClass(item.status)}}"
+                    bindtap="handleAction"
+                    data-id="{{item._id}}"
+                    data-action="{{getActionType(item.status)}}"
+                    wx:if="{{getActionType(item.status)}}"
+                  >
+                    <text>{{getActionText(item.status)}}</text>
+                  </view>
+                  <view
+                    class="action-btn contact"
+                    bindtap="contactUser"
+                    data-id="{{item._id}}"
+                    data-type="{{activeType === 'buy' ? 'seller' : 'buyer'}}"
+                    wx:if="{{item.status !== 'cancelled'}}"
+                  >
+                    <text>联系对方</text>
+                  </view>
+                </block>
+              </view>
+            </view>
+            
+            <view class="rating-section" wx:if="{{item.status === 'completed'}}">
+              <view class="rating-label">{{activeType === 'buy' ? '商品评价：' : '买家评价：'}}</view>
+              <view class="rating-stars">
+                <block wx:if="{{activeType === 'buy'}}">
+                  <block wx:if="{{item.rated}}">
+                    <view class="star {{item.rating >= 1 ? 'active' : ''}}">★</view>
+                    <view class="star {{item.rating >= 2 ? 'active' : ''}}">★</view>
+                    <view class="star {{item.rating >= 3 ? 'active' : ''}}">★</view>
+                    <view class="star {{item.rating >= 4 ? 'active' : ''}}">★</view>
+                    <view class="star {{item.rating >= 5 ? 'active' : ''}}">★</view>
+                    <text class="rated-text">已评价</text>
+                  </block>
+                  <block wx:else>
+                    <view class="star" bindtap="rateOrder" data-id="{{item._id}}" data-rating="1">★</view>
+                    <view class="star" bindtap="rateOrder" data-id="{{item._id}}" data-rating="2">★</view>
+                    <view class="star" bindtap="rateOrder" data-id="{{item._id}}" data-rating="3">★</view>
+                    <view class="star" bindtap="rateOrder" data-id="{{item._id}}" data-rating="4">★</view>
+                    <view class="star" bindtap="rateOrder" data-id="{{item._id}}" data-rating="5">★</view>
+                  </block>
+                </block>
+                <block wx:else>
+                  <view class="star {{item.rating >= 1 ? 'active' : ''}}">★</view>
+                  <view class="star {{item.rating >= 2 ? 'active' : ''}}">★</view>
+                  <view class="star {{item.rating >= 3 ? 'active' : ''}}">★</view>
+                  <view class="star {{item.rating >= 4 ? 'active' : ''}}">★</view>
+                  <view class="star {{item.rating >= 5 ? 'active' : ''}}">★</view>
+                </block>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 资料订单 -->
+        <view class="item-card" wx:else>
+          <view class="card-header">
+            <view class="order-id">订单号：{{item.orderId}}</view>
+            <view class="order-date">{{formatDate(item.createTime)}}</view>
+          </view>
+          
+          <view class="card-content">
+            <view class="item-header" bindtap="goToDetail" data-id="{{item._id}}" data-type="material">
+              <view class="item-title">{{item.title}}</view>
+              <view class="status-tag" style="background-color: {{getStatusColor(item.status)}}">
+                {{item.statusText || getStatusText(item.status, item)}}
+              </view>
+            </view>
+            
+            <view class="item-info" bindtap="goToDetail" data-id="{{item._id}}" data-type="material">
+              <view class="info-row">
+                <text class="label">类型:</text>
+                <text class="value">pdf</text>
+              </view>
+              <view class="info-row">
+                <text class="label">大小:</text>
+                <text class="value">{{item.fileSize}}</text>
+              </view>
+              <view class="info-row">
+                <text class="label">下载:</text>
+                <text class="value">{{item.downloadCount}}次</text>
+              </view>
+              <view class="info-row">
+                <text class="label">{{activeType === 'buy' ? '上传者' : '购买者'}}:</text>
+                <text class="value">{{activeType === 'buy' ? item.sellerName : item.buyerName}}</text>
+              </view>
+              <view class="info-row" wx:if="{{(activeType === 'buy' && item.sellerCampus) || (activeType === 'sell' && item.buyerCampus)}}">
+                <text class="label">校区:</text>
+                <text class="value">{{activeType === 'buy' ? item.sellerCampus : item.buyerCampus}}</text>
+              </view>
+              <view class="info-row" wx:if="{{(activeType === 'buy' && item.sellerDorm) || (activeType === 'sell' && item.buyerDorm)}}">
+                <text class="label">楼栋:</text>
+                <text class="value">{{activeType === 'buy' ? item.sellerDorm : item.buyerDorm}}</text>
+              </view>
+            </view>
+            
+            <view class="item-footer">
+              <view class="price" wx:if="{{item.price > 0}}">¥{{item.price}}</view>
+              <view class="price free" wx:else>免费</view>
+              <view class="actions">
+                <!-- 资料订单：只显示下载和联系对方 -->
+                <view 
+                  class="action-btn download" 
+                  bindtap="downloadMaterial" 
+                  data-id="{{item._id}}"
+                >
+                  <text>下载并打开</text>
+                </view>
+                <view 
+                  class="action-btn contact" 
+                  bindtap="contactUser" 
+                  data-id="{{item._id}}"
+                  data-type="{{activeType === 'buy' ? 'seller' : 'buyer'}}"
+                >
+                  <text>联系对方</text>
+                </view>
+              </view>
+            </view>
+            
+            <view class="rating-section" wx:if="{{item.status === 'completed'}}">
+              <view class="rating-label">{{activeType === 'buy' ? '商品评价：' : '买家评价：'}}</view>
+              <view class="rating-stars">
+                <block wx:if="{{activeType === 'buy'}}">
+                  <block wx:if="{{item.rated}}">
+                    <view class="star {{item.rating >= 1 ? 'active' : ''}}">★</view>
+                    <view class="star {{item.rating >= 2 ? 'active' : ''}}">★</view>
+                    <view class="star {{item.rating >= 3 ? 'active' : ''}}">★</view>
+                    <view class="star {{item.rating >= 4 ? 'active' : ''}}">★</view>
+                    <view class="star {{item.rating >= 5 ? 'active' : ''}}">★</view>
+                    <text class="rated-text">已评价</text>
+                  </block>
+                  <block wx:else>
+                    <view class="star" bindtap="rateOrder" data-id="{{item._id}}" data-rating="1">★</view>
+                    <view class="star" bindtap="rateOrder" data-id="{{item._id}}" data-rating="2">★</view>
+                    <view class="star" bindtap="rateOrder" data-id="{{item._id}}" data-rating="3">★</view>
+                    <view class="star" bindtap="rateOrder" data-id="{{item._id}}" data-rating="4">★</view>
+                    <view class="star" bindtap="rateOrder" data-id="{{item._id}}" data-rating="5">★</view>
+                  </block>
+                </block>
+                <block wx:else>
+                  <view class="star {{item.rating >= 1 ? 'active' : ''}}">★</view>
+                  <view class="star {{item.rating >= 2 ? 'active' : ''}}">★</view>
+                  <view class="star {{item.rating >= 3 ? 'active' : ''}}">★</view>
+                  <view class="star {{item.rating >= 4 ? 'active' : ''}}">★</view>
+                  <view class="star {{item.rating >= 5 ? 'active' : ''}}">★</view>
+                </block>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+    
+    <view class="no-more" wx:if="{{!loading && items.length > 0 && !hasMore}}">
+      <text>没有更多了</text>
+    </view>
+  </view>
+</view>

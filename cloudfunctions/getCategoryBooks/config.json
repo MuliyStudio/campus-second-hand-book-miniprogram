@@ -1,0 +1,9 @@
+{
+  "name": "getCategoryBooks",
+  "permissions": {
+    "openapi": []
+  },
+  "triggers": [],
+  "handler": "index.main",
+  "runtime": "Nodejs16.13"
+}

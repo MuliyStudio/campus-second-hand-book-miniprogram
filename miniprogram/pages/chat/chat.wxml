@@ -1,0 +1,233 @@
+<!-- pages/chat/chat.wxml -->
+<view class="container">
+  <!-- 头部导航 -->
+  <view class="chat-header">
+    <view class="header-left">
+      <view class="back-btn" bindtap="goBack">
+        <text class="back-icon">‹</text>
+      </view>
+    </view>
+    
+    <view class="header-center">
+      <view class="chat-user-info" bindtap="goToUserProfile" data-userid="{{receiver.id}}" data-userinfo="{{receiver}}">
+        <image src="{{receiver.avatar}}" class="user-avatar"></image>
+        <view class="user-details">
+          <text class="user-name">{{receiver.nickname}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <view class="header-right">
+      <view class="header-action" bindtap="showMoreActions">
+        <text class="action-icon">⋮</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 消息列表区域 -->
+  <scroll-view 
+    scroll-y 
+    class="message-list" 
+    scroll-into-view="{{scrollToId}}"
+    scroll-with-animation="true"
+    enable-back-to-top="true"
+    bindscroll="onScroll"
+    scroll-top="{{scrollTop}}"
+    enhanced="{{true}}"
+    show-scrollbar="{{false}}"
+    bindscrolltolower="onScrollToLower"
+  >
+    <!-- 加载更多提示 -->
+    <view class="load-more" wx:if="{{hasMore && loading}}">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+    
+    <!-- 消息列表 -->
+    <view class="messages-container" id="messagesContainer">
+      <!-- 时间分隔线 -->
+      <view class="time-divider" wx:if="{{showTodayDivider}}">
+        <view class="divider-line"></view>
+        <text class="divider-text">今天</text>
+        <view class="divider-line"></view>
+      </view>
+      
+      <!-- 消息列表 -->
+      <block wx:for="{{messages}}" wx:key="id" wx:for-index="index">
+        <!-- 消息时间显示（每小时显示一次） -->
+        <view class="message-time-divider" wx:if="{{shouldShowTime(index)}}">
+          <text class="time-text">{{formatMessageTime(item.time)}}</text>
+        </view>
+        
+        <!-- 对方消息 -->
+        <view class="message-item message-other" wx:if="{{item.sender === 'other'}}">
+          <image 
+            src="{{receiver.avatar}}" 
+            class="avatar" 
+            bindtap="goToUserProfile" 
+            data-userid="{{receiver.id}}" 
+            data-userinfo="{{receiver}}"
+          ></image>
+          
+          <view class="message-bubble-container">
+            <!-- 文本消息 -->
+            <view class="message-bubble bubble-other" wx:if="{{!item.type || item.type === 'text'}}" id="msg_{{item.id}}">
+              <text class="message-text">{{item.content}}</text>
+              <view class="bubble-tail"></view>
+            </view>
+            
+            <!-- 图片消息 -->
+            <view class="message-bubble bubble-other" wx:if="{{item.type === 'image'}}" bindtap="previewImage" data-src="{{item.content}}" id="msg_{{item.id}}">
+              <image src="{{item.content}}" class="message-image" mode="widthFix"></image>
+              <view class="bubble-tail"></view>
+            </view>
+            
+            <!-- 文件消息 -->
+            <view class="message-bubble bubble-other" wx:if="{{item.type === 'file'}}" bindtap="downloadFile" data-url="{{item.content.url}}" id="msg_{{item.id}}">
+              <view class="file-content">
+                <view class="file-icon">📄</view>
+                <view class="file-info">
+                  <text class="file-name">{{item.content.name}}</text>
+                  <text class="file-size">{{formatFileSize(item.content.size)}}</text>
+                </view>
+              </view>
+              <view class="bubble-tail"></view>
+            </view>
+            
+            <view class="message-status">
+              <text class="message-time">{{formatTime(item.time)}}</text>
+            </view>
+          </view>
+        </view>
+        
+        <!-- 我的消息 -->
+        <view class="message-item message-me" wx:else>
+          <view class="message-bubble-container">
+            <!-- 文本消息 -->
+            <view class="message-bubble bubble-me" wx:if="{{!item.type || item.type === 'text'}}" id="msg_{{item.id}}">
+              <text class="message-text">{{item.content}}</text>
+              <view class="bubble-tail"></view>
+            </view>
+            
+            <!-- 图片消息 -->
+            <view class="message-bubble bubble-me" wx:if="{{item.type === 'image'}}" bindtap="previewImage" data-src="{{item.content}}" id="msg_{{item.id}}">
+              <image src="{{item.content}}" class="message-image" mode="widthFix"></image>
+              <view class="bubble-tail"></view>
+            </view>
+            
+            <!-- 文件消息 -->
+            <view class="message-bubble bubble-me" wx:if="{{item.type === 'file'}}" bindtap="downloadFile" data-url="{{item.content.url}}" id="msg_{{item.id}}">
+              <view class="file-content">
+                <view class="file-icon">📄</view>
+                <view class="file-info">
+                  <text class="file-name">{{item.content.name}}</text>
+                  <text class="file-size">{{formatFileSize(item.content.size)}}</text>
+                </view>
+              </view>
+              <view class="bubble-tail"></view>
+            </view>
+            
+            <view class="message-status">
+              <text class="message-time">{{formatTime(item.time)}}</text>
+              <view class="message-status-icons">
+                <text class="status-icon" wx:if="{{item.status === 'sending'}}">🕐</text>
+                <text class="status-icon sent" wx:if="{{item.status === 'sent'}}">✓</text>
+                <text class="status-icon delivered" wx:if="{{item.status === 'delivered'}}">✓✓</text>
+                <text class="status-icon read" wx:if="{{item.status === 'read'}}">✓✓</text>
+              </view>
+            </view>
+          </view>
+          
+          <image src="{{sender.avatar}}" class="avatar"></image>
+        </view>
+      </block>
+    </view>
+    
+    <!-- 底部占位符 -->
+    <view class="list-bottom" id="listBottom"></view>
+  </scroll-view>
+
+  <!-- 表情面板 -->
+  <emoji-panel 
+    wx:if="{{showEmojiPanel}}"
+    visible="{{showEmojiPanel}}" 
+    bind:select="onEmojiSelect" 
+    bind:delete="onEmojiDelete"
+    bind:close="toggleEmojiPanel"
+  />
+  
+  <!-- 输入区域 -->
+  <view class="input-area">
+    <!-- 文本输入面板 -->
+    <view class="text-input-panel">
+      <view class="input-center">
+        <input
+          class="message-input"
+          placeholder="请输入消息..."
+          value="{{inputValue}}"
+          bindinput="onInputChange"
+          bindconfirm="sendMessage"
+          focus="{{autoFocus}}"
+          confirm-type="send"
+          adjust-position="{{true}}"
+          cursor-spacing="20"
+          placeholder-style="color: #999;"
+        />
+      </view>
+      
+      <view class="input-right">
+        <!-- 表情按钮 -->
+        <view class="input-btn" bindtap="toggleEmojiPanel">
+          <text class="btn-icon emoji">😊</text>
+        </view>
+        
+        <!-- 加号按钮（更多功能） -->
+        <view class="input-btn" bindtap="toggleMorePanel">
+          <text class="btn-icon plus">+</text>
+        </view>
+        
+        <!-- 发送按钮 -->
+        <view 
+          class="send-btn {{inputValue.trim() ? 'active' : ''}}" 
+          bindtap="sendMessage"
+        >
+          <text class="send-text">{{inputValue.trim() ? '发送' : '发送'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 底部更多选项面板 -->
+  <view class="more-panel-container" wx:if="{{showMorePanel}}">
+    <!-- 遮罩层 -->
+    <view class="more-panel-overlay" bindtap="toggleMorePanel"></view>
+    
+    <!-- 选项面板 -->
+    <view class="more-panel">
+      <view class="more-panel-header">
+        <view class="panel-handle"></view>
+      </view>
+      
+      <view class="more-options-grid">
+        <view class="more-option-item" bindtap="sendImage">
+          <view class="option-icon photo">
+            <text class="icon">📷</text>
+          </view>
+          <text class="option-text">照片</text>
+        </view>
+        <view class="more-option-item" bindtap="takePhoto">
+          <view class="option-icon camera">
+            <text class="icon">📸</text>
+          </view>
+          <text class="option-text">拍摄</text>
+        </view>
+        <view class="more-option-item" bindtap="showQuickReplies">
+          <view class="option-icon quick">
+            <text class="icon">💬</text>
+          </view>
+          <text class="option-text">快捷回复</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

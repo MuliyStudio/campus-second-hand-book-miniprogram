@@ -1,0 +1,289 @@
+<!-- pages/publish-book/publish-book.wxml -->
+<view class="container">
+  <!-- 顶部标题栏 -->
+  <view class="header">
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="title-section">
+      <text class="title">发布二手书</text>
+      <text class="subtitle">分享您的闲置教材</text>
+    </view>
+  </view>
+
+  <!-- 主要内容区域 -->
+  <scroll-view scroll-y class="content" enable-back-to-top>
+    <form bindsubmit="onSubmit" class="form">
+      <!-- 必填项标识 -->
+      <view class="required-hint">
+        <view class="hint-icon">*</view>
+        <view class="hint-text">为必填项</view>
+      </view>
+
+      <!-- 书籍图片上传 -->
+      <view class="form-section">
+        <view class="section-title">
+          <view class="title-text">书籍图片</view>
+          <view class="required-tag">*</view>
+        </view>
+        <view class="section-subtitle">至少上传一张封面图片</view>
+        
+        <view class="image-upload-container">
+          <view class="image-grid">
+            <!-- 已上传图片 -->
+            <block wx:for="{{bookImages}}" wx:key="*this">
+              <view class="image-card">
+                <image src="{{item.fileID || item}}" class="preview-image" mode="aspectFill" />
+                <view class="image-overlay">
+                  <view class="image-delete" bindtap="deleteImage" data-index="{{index}}">
+                    <view class="delete-icon">×</view>
+                  </view>
+                  <view class="cover-badge" wx:if="{{index === 0}}">封面</view>
+                </view>
+              </view>
+            </block>
+            
+            <!-- 添加图片按钮 -->
+            <view 
+              class="upload-card" 
+              bindtap="chooseBookImages"
+              wx:if="{{bookImages.length < 5}}"
+            >
+              <view class="upload-icon">+</view>
+              <view class="upload-text">添加图片</view>
+              <view class="upload-count">({{bookImages.length}}/5)</view>
+            </view>
+          </view>
+          
+          <view class="upload-tips">
+            <view class="tip-item">
+              <view class="tip-bullet">•</view>
+              <view class="tip-content">支持JPG、PNG格式</view>
+            </view>
+            <view class="tip-item">
+              <view class="tip-bullet">•</view>
+              <view class="tip-content">单张不超过5MB</view>
+            </view>
+            <view class="tip-item">
+              <view class="tip-bullet">•</view>
+              <view class="tip-content">第一张将作为封面图</view>
+            </view>
+          </view>
+          
+          <!-- 上传状态 -->
+          <view class="upload-progress" wx:if="{{isUploading}}">
+            <view class="progress-bar">
+              <view class="progress-fill" style="width: {{uploadProgress}}"></view>
+            </view>
+            <view class="progress-text">上传中... {{uploadProgress}}%</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 书籍基本信息 -->
+      <view class="form-section">
+        <view class="section-title">
+          <view class="title-text">基本信息</view>
+        </view>
+        
+        <!-- 书籍标题 -->
+        <view class="form-item">
+          <view class="item-label">
+            <view class="label-text">书籍标题</view>
+            <view class="required-tag">*</view>
+          </view>
+          <input 
+            class="input-box" 
+            name="title" 
+            placeholder="例如：高等数学（第七版）上册" 
+            value="{{formData.title}}"
+            bindinput="onInput"
+            data-field="title"
+            maxlength="50"
+          />
+        </view>
+        
+        <!-- 作者 -->
+        <view class="form-item">
+          <view class="item-label">
+            <view class="label-text">作者</view>
+            <view class="required-tag">*</view>
+          </view>
+          <input 
+            class="input-box" 
+            name="author" 
+            placeholder="例如：张三" 
+            value="{{formData.author}}"
+            bindinput="onInput"
+            data-field="author"
+            maxlength="30"
+          />
+        </view>
+        
+        <!-- 出版社 -->
+        <view class="form-item">
+          <view class="item-label">
+            <view class="label-text">出版社</view>
+            <view class="required-tag">*</view>
+          </view>
+          <input 
+            class="input-box" 
+            name="publisher" 
+            placeholder="例如：高等教育出版社" 
+            value="{{formData.publisher}}"
+            bindinput="onInput"
+            data-field="publisher"
+            maxlength="30"
+          />
+        </view>
+        
+        <!-- 对应课程 -->
+        <view class="form-item">
+          <view class="item-label">
+            <view class="label-text">对应课程</view>
+            <view class="required-tag">*</view>
+          </view>
+          <input 
+            class="input-box" 
+            name="course" 
+            placeholder="例如：高等数学、数据结构" 
+            value="{{formData.course}}"
+            bindinput="onInput"
+            data-field="course"
+            maxlength="20"
+          />
+        </view>
+      </view>
+
+      <!-- 书籍属性 -->
+      <view class="form-section">
+        <view class="section-title">
+          <view class="title-text">书籍属性</view>
+        </view>
+        
+        <!-- 价格 -->
+        <view class="form-item">
+          <view class="item-label">
+            <view class="label-text">价格</view>
+            <view class="required-tag">*</view>
+          </view>
+          <view class="price-input-group">
+            <view class="price-symbol">¥</view>
+            <input 
+              class="input-box price-input" 
+              name="price" 
+              type="digit" 
+              placeholder="0.00" 
+              value="{{formData.price}}"
+              bindinput="onPriceInput"
+              maxlength="6"
+            />
+            <view class="price-unit">元</view>
+          </view>
+        </view>
+        
+        <!-- 新旧程度 -->
+        <view class="form-item">
+          <view class="item-label">
+            <view class="label-text">新旧程度</view>
+            <view class="required-tag">*</view>
+          </view>
+          <view class="condition-selector">
+            <picker 
+              range="{{conditionOptions}}" 
+              value="{{conditionIndex}}"
+              bindchange="onConditionChange"
+            >
+              <view class="condition-display">
+                <view class="condition-score">{{formData.condition}}分</view>
+                <view class="condition-desc">{{conditionDesc[formData.condition]}}</view>
+                <view class="picker-icon">⌵</view>
+              </view>
+            </picker>
+            <view class="condition-scale">
+              <view class="scale-track">
+                <view 
+                  class="scale-thumb" 
+                  style="left: {{(formData.condition - 1) * 10}}"
+                >
+                  <view class="thumb-dot"></view>
+                  <view class="thumb-value">{{formData.condition}}</view>
+                </view>
+              </view>
+              <view class="scale-marks">
+                <view class="scale-mark">1</view>
+                <view class="scale-mark">5</view>
+                <view class="scale-mark">10</view>
+              </view>
+              <view class="scale-labels">
+                <view class="scale-label">较差</view>
+                <view class="scale-label">一般</view>
+                <view class="scale-label">全新</view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 详细描述 -->
+      <view class="form-section">
+        <view class="section-title">
+          <view class="title-text">详细描述</view>
+          <view class="required-tag">*</view>
+        </view>
+        <view class="section-subtitle">请详细描述书籍状况，让买家更了解</view>
+        
+        <view class="description-container">
+          <textarea 
+            class="description-input" 
+            name="description" 
+            placeholder="请描述书籍的详细状况：\n• 是否有划线、笔记\n• 是否有破损、缺页\n• 是否有污渍、折痕\n• 是否包含课后答案\n• 其他需要说明的情况" 
+            value="{{formData.description}}"
+            bindinput="onDescriptionInput"
+            maxlength="500"
+            auto-height
+          />
+          <view class="word-count">
+            <view class="count-text">{{formData.description.length}}/500</view>
+          </view>
+        </view>
+        
+        <view class="description-tips">
+          <view class="tips-title">填写建议：</view>
+          <view class="tip-item">✓ 如实描述书籍状况</view>
+          <view class="tip-item">✓ 包含重点信息如页码是否完整</view>
+          <view class="tip-item">✓ 有笔记或划线的请注明位置</view>
+        </view>
+      </view>
+
+      <!-- 发布按钮 -->
+      <view class="action-section">
+        <view class="price-summary" wx:if="{{formData.price}}">
+          <view class="summary-label">发布价格：</view>
+          <view class="summary-value">¥{{formData.price}}</view>
+        </view>
+        
+        <button 
+          formType="submit" 
+          class="submit-btn" 
+          hover-class="submit-btn-hover"
+          loading="{{isSubmitting}}"
+          disabled="{{isSubmitting || bookImages.length === 0}}"
+        >
+          <view class="btn-content">
+            <view class="btn-icon" wx:if="{{!isSubmitting}}">📚</view>
+            <view class="btn-text">{{isSubmitting ? '发布中...' : '确认发布'}}</view>
+          </view>
+        </button>
+        
+        <view class="publish-agreement">
+          <view class="agreement-text">发布即表示您已阅读并同意</view>
+          <view class="agreement-link">《二手书籍交易协议》</view>
+        </view>
+      </view>
+      
+      <!-- 底部安全区域 -->
+      <view class="safe-area"></view>
+    </form>
+  </scroll-view>
+</view>

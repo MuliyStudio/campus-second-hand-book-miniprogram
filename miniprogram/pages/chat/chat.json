@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "emoji-panel": "../../components/emoji-panel/emoji-panel"
+  },
+  "navigationBarTitleText": ""
+}

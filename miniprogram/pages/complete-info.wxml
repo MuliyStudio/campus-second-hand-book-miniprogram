@@ -1,0 +1,79 @@
+<!-- pages/complete-info.wxml -->
+<view class="container">
+  <view class="form-title">完善个人信息</view>
+
+  <view class="input-item">
+    <text>学号</text>
+    <input 
+      value="{{studentId}}" 
+      bindinput="onStudentIdInput" 
+      placeholder="请输入学号"
+      maxlength="12"
+      type="number"
+    />
+  </view>
+
+  <view class="input-item">
+    <text>校区</text>
+    <radio-group bindchange="onCampusChange">
+      <label class="radio-label">
+        <radio value="west" checked="{{campus === 'west'}}" color="#007AFF" /> 西校区
+      </label>
+      <label class="radio-label">
+        <radio value="east" checked="{{campus === 'east'}}" color="#007AFF" /> 东校区
+      </label>
+    </radio-group>
+  </view>
+
+  <view class="input-item">
+    <text>年级</text>
+    <input 
+      value="{{grade}}" 
+      bindinput="onGradeInput" 
+      placeholder="例如：2023"
+      type="number"
+      maxlength="4"
+    />
+  </view>
+
+  <view class="input-item">
+    <text>学院</text>
+    <input 
+      value="{{college}}" 
+      bindinput="onCollegeInput" 
+      placeholder="请输入学院"
+      maxlength="30"
+    />
+  </view>
+
+  <view class="input-item">
+    <text>专业</text>
+    <input 
+      value="{{major}}" 
+      bindinput="onMajorInput" 
+      placeholder="请输入专业"
+      maxlength="30"
+    />
+  </view>
+
+  <view wx:if="{{campus === 'west'}}" class="input-item">
+    <text>宿舍</text>
+    <picker mode="selector" range="{{dormOptions}}" bindchange="onDormChange">
+      <view>{{dormitory || '请选择宿舍'}}</view>
+    </picker>
+  </view>
+
+  <view class="input-item">
+    <text>性别</text>
+    <radio-group bindchange="onGenderChange">
+      <label class="radio-label">
+        <radio value="male" checked="{{gender === 'male'}}" color="#007AFF" /> 男
+      </label>
+      <label class="radio-label">
+        <radio value="female" checked="{{gender === 'female'}}" color="#007AFF" /> 女
+      </label>
+    </radio-group>
+  </view>
+
+  <button class="submit-btn" bindtap="submitForm">提交</button>
+</view>

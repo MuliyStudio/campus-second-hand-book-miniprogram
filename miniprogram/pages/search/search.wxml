@@ -1,0 +1,178 @@
+<view class="container">
+  <view class="search-header">
+    <view class="search-box">
+      <view class="back-btn" bindtap="goBack">←</view>
+      <view class="search-input-wrapper">
+        <view class="search-icon">🔍</view>
+        <input 
+          class="search-input" 
+          placeholder="搜索书名、专业、校区宿舍..." 
+          value="{{searchText}}"
+          bindinput="onInput"
+          bindconfirm="onSearch"
+          bindblur="hideSuggestions"
+          confirm-type="search"
+        />
+        <view wx:if="{{searchText}}" class="clear-btn" bindtap="clearInput">×</view>
+      </view>
+      <view class="search-btn" bindtap="onSearch">搜索</view>
+    </view>
+  </view>
+
+  <view class="suggestions-panel" wx:if="{{showSuggestions && suggestions.length > 0}}">
+    <view class="suggestions-list">
+      <block wx:for="{{suggestions}}" wx:key="text">
+        <view class="suggestion-item" bindtap="selectSuggestion" data-text="{{item.text}}">
+          <view class="suggestion-icon">{{item.type === 'hot' ? '🔥' : '🕐'}}</view>
+          <view class="suggestion-text">
+            <text>{{item.highlightText}}</text>
+          </view>
+          <view class="suggestion-type">{{item.type === 'hot' ? '热门' : '历史'}}</view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="result-page" wx:if="{{hasSearched}}">
+    <view class="filter-bar">
+      <scroll-view scroll-x class="filter-scroll">
+        <view class="filter-list">
+          <view 
+            class="filter-item {{currentFilter === '' ? 'active' : ''}}" 
+            bindtap="changeFilter" 
+            data-filter=""
+          >
+            综合
+          </view>
+          <view 
+            class="filter-item {{currentFilter === 'price_asc' ? 'active' : ''}}" 
+            bindtap="changeFilter" 
+            data-filter="price_asc"
+          >
+            价格↑
+          </view>
+          <view 
+            class="filter-item {{currentFilter === 'price_desc' ? 'active' : ''}}" 
+            bindtap="changeFilter" 
+            data-filter="price_desc"
+          >
+            价格↓
+          </view>
+          <view 
+            class="filter-item {{currentFilter === 'new' ? 'active' : ''}}" 
+            bindtap="changeFilter" 
+            data-filter="new"
+          >
+            最新
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <scroll-view 
+      scroll-y 
+      class="product-list" 
+      bindscrolltolower="loadMore"
+    >
+      <view class="result-info">
+        <text>找到 {{searchResults.length}} 本相关书籍</text>
+      </view>
+      
+      <view class="product-grid">
+        <block wx:for="{{searchResults}}" wx:key="_id">
+          <view class="product-card" bindtap="goToDetail" data-id="{{item._id || item.id}}">
+            <view class="product-img">
+              <image src="{{item.coverUrl || 'https://via.placeholder.com/300x300/667eea/ffffff?text=书籍'}}" mode="aspectFill" lazy-load></image>
+              <view class="product-status {{item.status}}">
+                {{item.statusText || (item.status === 'reserved' ? '预定中' : '在售')}}
+              </view>
+              <view class="book-condition {{item.condition >= 9 ? 'condition-new' : item.condition >= 7 ? 'condition-good' : 'condition-normal'}}">{{item.conditionText || '未知'}}</view>
+            </view>
+            
+            <view class="book-info">
+              <view class="book-title-row">
+                <text class="book-title">
+                  {{item.title.length <= 10 ? item.title : item.title.substring(0, 10) + '...'}}
+                </text>
+              </view>
+              
+              <view class="match-tag" wx:if="{{item.matchType}}">
+                <text>{{item.matchType === 'title' ? '书名' : item.matchType === 'college' ? '学院' : item.matchType === 'major' ? '专业' : item.matchType === 'course' ? '课程' : ''}}</text>
+              </view>
+              
+              <view class="book-price-section">
+                <text class="book-price">¥{{item.price}}</text>
+              </view>
+              
+              <view class="seller-info">
+                <image class="seller-avatar" src="{{item.sellerAvatar || 'https://via.placeholder.com/80x80/667eea/ffffff?text=用户'}}" mode="aspectFill"></image>
+                <view class="seller-details">
+                  <text class="seller-name">{{item.sellerName || '匿名用户'}}</text>
+                  <view class="seller-location">
+                    <text class="location-icon">📍</text>
+                    <text class="location-text">{{item.sellerDorm || '未知宿舍'}}</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </block>
+      </view>
+      
+      <view class="load-more" wx:if="{{hasMore && !isLoading}}">
+        <text>上拉加载更多</text>
+      </view>
+      
+      <view class="loading-container" wx:if="{{isLoading}}">
+        <view class="loading-spinner"></view>
+        <text class="loading-text">加载中...</text>
+      </view>
+      
+      <view class="no-more" wx:if="{{!hasMore && searchResults.length > 0}}">
+        没有更多了
+      </view>
+      
+      <view class="no-result" wx:if="{{searchResults.length === 0 && !isLoading}}">
+        <view class="empty-icon">🔍</view>
+        <view class="empty-text">没有找到相关书籍</view>
+        <view class="empty-tip">换个关键词试试吧</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="history-page" wx:if="{{!hasSearched && !showSuggestions}}">
+    <view class="hot-search">
+      <view class="section-header">
+        <view class="section-title">热门搜索</view>
+      </view>
+      <view class="hot-tags">
+        <block wx:for="{{hotSearch}}" wx:key="*this">
+          <view class="hot-tag" bindtap="clickHotTag" data-text="{{item}}">
+            {{item}}
+          </view>
+        </block>
+      </view>
+    </view>
+
+    <view class="history-section">
+      <view class="section-header">
+        <view class="section-title">历史记录</view>
+        <view class="clear-history" bindtap="clearAllHistory" wx:if="{{searchHistory.length > 0}}">
+          清空
+        </view>
+      </view>
+      <view class="history-list">
+        <block wx:for="{{searchHistory}}" wx:key="*this">
+          <view class="history-item" bindtap="clickHistory" data-text="{{item}}">
+            <view class="time-icon">🕐</view>
+            <view class="history-text">{{item}}</view>
+            <view class="delete-btn" catchtap="deleteHistory" data-index="{{index}}">×</view>
+          </view>
+        </block>
+      </view>
+      <view wx:if="{{searchHistory.length === 0}}" class="empty-history">
+        暂无搜索记录
+      </view>
+    </view>
+  </view>
+</view>

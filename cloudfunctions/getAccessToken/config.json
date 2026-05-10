@@ -1,0 +1,9 @@
+{
+  "name": "getAccessToken",
+  "permissions": {
+    "openapi": []
+  },
+  "triggers": [],
+  "handler": "index.main",
+  "runtime": "Nodejs16.13"
+}

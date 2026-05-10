@@ -1,0 +1,70 @@
+<!-- components/user-info-dialog/user-info-dialog.wxml -->
+<view class="dialog-container" wx:if="{{visible}}">
+  <!-- 遮罩层 -->
+  <view class="dialog-overlay" catchtap="onClose"></view>
+  
+  <!-- 对话框内容 -->
+  <view class="dialog-content">
+    <!-- 头部 -->
+    <view class="dialog-header">
+      <text class="dialog-title">用户信息</text>
+      <view class="dialog-close" catchtap="onClose">
+        <text class="close-icon">×</text>
+      </view>
+    </view>
+    
+    <!-- 用户信息 -->
+    <view class="user-info-section">
+      <!-- 头像和基本信息 -->
+      <view class="user-basic-info">
+        <image 
+          src="{{userInfo.avatarUrl}}" 
+          class="user-avatar" 
+          mode="aspectFill"
+        />
+        <view class="user-details">
+          <text class="user-nickname">{{userInfo.nickname}}</text>
+          <text class="user-uid">ID: {{userInfo.uid || '未知'}}</text>
+        </view>
+      </view>
+      
+      <!-- 详细信息 -->
+      <view class="user-details-section">
+        <view class="info-item">
+          <text class="info-label">学院</text>
+          <text class="info-value">{{userInfo.college || '未设置'}}</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">专业</text>
+          <text class="info-value">{{userInfo.major || '未设置'}}</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">年级</text>
+          <text class="info-value">{{userInfo.grade || '未设置'}}</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">注册时间</text>
+          <text class="info-value">{{userInfo.regTime || '未知'}}</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">发布书籍</text>
+          <text class="info-value">{{userInfo.publishedBooks || 0}} 本</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">已售书籍</text>
+          <text class="info-value">{{userInfo.soldBooks || 0}} 本</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 操作按钮 -->
+    <view class="dialog-actions">
+      <view class="action-button primary" catchtap="onViewProfile">
+        <text class="button-text">查看完整资料</text>
+      </view>
+      <view class="action-button secondary" catchtap="onClose">
+        <text class="button-text">关闭</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,208 @@
+<!--pages/publish-post/publish-post.wxml-->
+<view class="container">
+  <!-- 返回按钮 -->
+  <view class="header">
+    <view class="header-left">
+      <view class="back-btn" bindtap="goBack">
+        <text class="back-icon">‹</text>
+      </view>
+    </view>
+    <view class="header-center">
+      <text class="page-title">发布帖子</text>
+    </view>
+    <view class="header-right">
+      <view 
+        class="submit-btn {{canSubmit && !isSubmitting ? 'active' : ''}}" 
+        bindtap="submitPost"
+      >
+        <text class="submit-text">{{isSubmitting ? '发布中...' : '发布'}}</text>
+        <view class="loading-spinner" wx:if="{{isSubmitting}}"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 主要内容区域 -->
+  <scroll-view class="content" scroll-y enhanced="{{true}}" show-scrollbar="{{false}}">
+    <!-- 帖子类型选择 -->
+    <view class="section">
+      <text class="section-title">帖子类型</text>
+      <view class="section-content">
+        <view class="type-list">
+          <view 
+            wx:for="{{postTypes}}" 
+            wx:key="value"
+            class="type-item {{postInfo.type === item.value ? 'active' : ''}}"
+            data-type="{{item.value}}"
+            bindtap="selectPostType"
+          >
+            <view class="type-icon-container">
+              <text class="type-icon">{{item.icon}}</text>
+            </view>
+            <text class="type-label">{{item.label}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 标题输入 -->
+    <view class="section">
+      <text class="section-title">标题</text>
+      <view class="section-content">
+        <input 
+          class="title-input" 
+          placeholder="请输入标题（5-50字）" 
+          placeholder-style="color: #999;"
+          value="{{postInfo.title}}"
+          bindinput="bindTitleInput"
+          bindfocus="onTitleFocus"
+          bindblur="onTitleBlur"
+          maxlength="50"
+          adjust-position="{{true}}"
+        />
+        <view class="input-counter">
+          <text class="counter-text">{{postInfo.title.length}}/50</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 内容输入 -->
+    <view class="section">
+      <text class="section-title">内容</text>
+      <view class="section-content">
+        <textarea 
+          class="content-input" 
+          placeholder="请输入内容，分享你的想法..." 
+          placeholder-style="color: #999;"
+          value="{{postInfo.content}}"
+          bindinput="bindContentInput"
+          bindfocus="onContentFocus"
+          bindblur="onContentBlur"
+          maxlength="2000"
+          auto-height="{{true}}"
+          show-confirm-bar="{{false}}"
+          adjust-position="{{true}}"
+        />
+        <view class="input-counter">
+          <text class="counter-text">{{postInfo.content.length}}/2000</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 媒体上传 -->
+    <view class="section">
+      <view class="section-header">
+        <text class="section-title">添加图片</text>
+        <text class="section-tip">{{selectedImages.length}}/9 图片</text>
+      </view>
+      <view class="section-content">
+        <view class="media-list">
+          <!-- 已选图片 -->
+          <view
+            wx:for="{{selectedImages}}"
+            wx:key="index"
+            class="media-item image-item"
+            data-index="{{index}}"
+            bindtap="previewImage"
+          >
+            <image src="{{item.path}}" class="media-image" mode="aspectFill" lazy-load="{{true}}" />
+            <view class="media-overlay" wx:if="{{isDeletingImageIndex === index}}">
+              <view class="deleting-text">删除中...</view>
+            </view>
+            <view class="media-actions">
+              <view class="media-delete" bindtap="deleteImage" catchtap="stopPropagation" data-index="{{index}}">
+                <text class="delete-icon">×</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 添加图片按钮 -->
+          <view
+            class="media-item add-btn"
+            bindtap="chooseImages"
+            wx:if="{{selectedImages.length < 9}}"
+          >
+            <view class="add-btn-content">
+              <text class="add-icon">📷</text>
+              <text class="add-text">添加图片</text>
+              <text class="add-tip">最多9张</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 标签管理 -->
+    <view class="section">
+      <text class="section-title">添加标签</text>
+      <view class="section-content">
+        <view class="tag-input-container">
+          <input 
+            class="tag-input" 
+            placeholder="输入标签，最多5个" 
+            placeholder-style="color: #999;"
+            value="{{tagInput}}"
+            bindinput="bindTagInput"
+            bindfocus="onTagFocus"
+            bindblur="onTagBlur"
+            bindconfirm="addTag"
+            maxlength="10"
+            adjust-position="{{true}}"
+          />
+          <view class="tag-counter">
+            <text class="counter-text">{{postInfo.tags.length}}/5</text>
+          </view>
+        </view>
+        
+        <view class="tag-list" wx:if="{{postInfo.tags.length > 0}}">
+          <view 
+            wx:for="{{postInfo.tags}}" 
+            wx:key="index"
+            class="tag-item"
+          >
+            <text class="tag-text">{{item}}</text>
+            <view class="tag-delete" bindtap="deleteTag" data-index="{{index}}">
+              <text class="delete-icon">×</text>
+            </view>
+          </view>
+        </view>
+        
+        <view class="tag-examples" wx:if="{{!tagInput}}">
+          <text class="example-title">常用标签：</text>
+          <view class="example-tags">
+            <view 
+              wx:for="{{suggestedTags}}" 
+              wx:key="index"
+              class="example-tag"
+              data-tag="{{item}}"
+              bindtap="selectSuggestedTag"
+            >
+              <text class="example-tag-text">{{item}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 发布提示 -->
+    <!-- <view class="section tip-section">
+      <view class="tip-content">
+        <view class="tip-icon">💡</view>
+        <view class="tip-texts">
+          <text class="tip-text">• 标题简洁明了，突出主题</text>
+          <text class="tip-text">• 内容真实可信，避免夸大</text>
+          <text class="tip-text">• 图片视频清晰，相关性强</text>
+          <text class="tip-text">• 标签精准描述，便于搜索</text>
+          <text class="tip-text">• 遵守社区规范，文明发帖</text>
+        </view>
+      </view>
+    </view> -->
+
+      <!-- 底部提示 -->
+    <view class="bottom-tip">
+      <text class="tip-text">提示：发布帖子时请遵守相关法律法规，不要发布违规内容</text>
+    </view>
+    
+    <!-- 底部安全区域 -->
+    <view class="safe-area-bottom"></view>
+  </scroll-view>
+</view>

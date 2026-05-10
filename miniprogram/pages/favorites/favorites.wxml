@@ -1,0 +1,260 @@
+<!-- pages/favorites/favorites.wxml -->
+<view class="container">
+  <!-- 顶部操作栏 -->
+  <view class="header">
+    <view class="header-left">
+      <!-- 返回按钮 -->
+      <view class="back-btn" bindtap="goBack">
+        <text class="back-icon">‹</text>
+      </view>
+    </view>
+    
+    <view class="header-center">
+      <!-- 标题 -->
+      <view class="header-title">我的收藏</view>
+    </view>
+    
+    <view class="header-right">
+      <!-- 管理按钮 -->
+      <view class="action-btn" bindtap="toggleEdit">
+        <text class="action-text">{{isEditMode ? '完成' : '管理'}}</text>
+      </view>
+      
+      <!-- 搜索按钮 -->
+      <view class="search-btn" bindtap="showSearch" wx:if="{{!showSearchInput}}">
+        <view class="search-icon">🔍</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 搜索框（点击搜索按钮时显示） -->
+  <view class="search-container" wx:if="{{showSearchInput}}">
+    <view class="search-input-wrapper">
+      <view class="search-icon">🔍</view>
+      <input 
+        class="search-input" 
+        placeholder="搜索收藏内容..." 
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        bindconfirm="onSearch"
+        confirm-type="search"
+        focus="{{showSearchInput}}"
+      />
+      <view wx:if="{{searchKeyword}}" class="clear-search" bindtap="clearSearch">×</view>
+      <view class="cancel-search" bindtap="hideSearch">取消</view>
+    </view>
+  </view>
+
+  <!-- 分类标签 -->
+  <view class="tabs">
+    <view 
+      class="tab-item {{activeTab === 0 ? 'active' : ''}}" 
+      bindtap="switchTab" 
+      data-index="0"
+    >
+      <text class="tab-text">二手书</text>
+      <view class="tab-count" wx:if="{{filteredBooks.length > 0}}">
+        {{filteredBooks.length}}
+      </view>
+    </view>
+    <view 
+      class="tab-item {{activeTab === 1 ? 'active' : ''}}" 
+      bindtap="switchTab" 
+      data-index="1"
+    >
+      <text class="tab-text">资料</text>
+      <view class="tab-count" wx:if="{{filteredMaterials.length > 0}}">
+        {{filteredMaterials.length}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 内容区域 -->
+  <scroll-view scroll-y class="content-scroll">
+    <!-- 二手书收藏 -->
+    <view class="tab-content" wx:if="{{activeTab === 0}}">
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{filteredBooks.length === 0}}">
+        <view class="empty-icon">📚</view>
+        <text class="empty-text">{{searchKeyword ? '未找到相关书籍' : '暂无收藏的二手书'}}</text>
+        <text class="empty-tip">{{searchKeyword ? '换个关键词试试吧' : '快去发现喜欢的书籍吧~'}}</text>
+      </view>
+
+      <!-- 按卖家分组显示书籍 -->
+      <view class="seller-groups" wx:if="{{filteredBooks.length > 0}}">
+        <block wx:for="{{groupedBooks}}" wx:key="sellerId" wx:for-item="sellerGroup">
+          <!-- 卖家信息卡片 -->
+          <view class="seller-card">
+            <view class="seller-header">
+              <view class="seller-info" bindtap="goToSellerPage" data-seller-id="{{sellerGroup.sellerId}}">
+                <image class="seller-avatar" src="{{sellerGroup.sellerAvatar}}" mode="aspectFill"></image>
+                <view class="seller-details">
+                  <view class="seller-name">{{sellerGroup.sellerName}}</view>
+                  <view class="seller-meta">
+                    <text wx:if="{{sellerGroup.sellerDorm}}">🏠 {{sellerGroup.sellerDorm}}</text>
+                    <text wx:if="{{sellerGroup.sellerMajor}}" class="seller-major">📚 {{sellerGroup.sellerMajor}}</text>
+                  </view>
+                </view>
+              </view>
+              <view class="seller-book-count">{{sellerGroup.bookCount}}本书</view>
+            </view>
+            
+            <!-- 该卖家的书籍列表 -->
+            <view class="seller-books">
+              <block wx:for="{{sellerGroup.books}}" wx:key="id" wx:for-item="book">
+                <view
+                  class="book-item {{book.isReserved ? 'reserved' : ''}} {{book.isInvalid ? 'invalid' : ''}}"
+                  bindtap="goToDetail"
+                  data-id="{{book.id}}"
+                  data-type="book"
+                  data-invalid="{{book.isInvalid}}"
+                >
+                  <!-- 选择框 - 管理模式下所有都可以选择 -->
+                  <view class="select-box" catchtap="toggleSelect" data-index="{{index}}" data-seller-id="{{sellerGroup.sellerId}}">
+                    <view class="checkbox {{book.selected ? 'checked' : ''}}">
+                      <text class="check-icon" wx:if="{{book.selected}}">✓</text>
+                    </view>
+                  </view>
+
+                  <!-- 书籍图片 -->
+                  <image src="{{book.image}}" class="item-image" mode="aspectFill" lazy-load></image>
+
+                  <!-- 书籍信息 -->
+                  <view class="item-info">
+                    <view class="item-title">{{book.title}}</view>
+                    <view class="item-meta">
+                      <view class="item-status {{book.status}}">{{book.statusText}}</view>
+                      <view class="item-condition">{{book.condition}}成新</view>
+                    </view>
+
+                    <view class="item-bottom">
+                      <view class="item-price">¥{{book.price}}</view>
+                    </view>
+                  </view>
+                </view>
+              </block>
+            </view>
+          </view>
+        </block>
+      </view>
+    </view>
+
+    <!-- 资料收藏 -->
+    <view class="tab-content" wx:if="{{activeTab === 1}}">
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{filteredMaterials.length === 0}}">
+        <view class="empty-icon">📁</view>
+        <text class="empty-text">{{searchKeyword ? '未找到相关资料' : '暂无收藏的资料'}}</text>
+        <text class="empty-tip">{{searchKeyword ? '换个关键词试试吧' : '快去发现有用的资料吧~'}}</text>
+      </view>
+
+      <!-- 资料列表 -->
+      <view class="list" wx:if="{{filteredMaterials.length > 0}}">
+        <block wx:for="{{filteredMaterials}}" wx:key="id" wx:for-index="index">
+          <view class="material-item" bindtap="goToDetail" data-id="{{item.id}}" data-type="material">
+            <!-- 选择框 -->
+            <view class="select-box" catchtap="toggleSelect" data-index="{{index}}" data-type="material">
+              <view class="checkbox {{item.selected ? 'checked' : ''}}">
+                <text class="check-icon" wx:if="{{item.selected}}">✓</text>
+              </view>
+            </view>
+            
+            <!-- 资料信息 -->
+            <view class="material-content">
+              <view class="material-info">
+                <view class="material-title">{{item.title}}</view>
+                <view class="material-meta">
+                  <view class="material-type">{{item.typeText}}</view>
+                  <view class="material-size">{{item.size}}</view>
+                </view>
+              </view>
+              <view class="material-price-section">
+                <view class="material-price {{item.price === 0 ? 'free' : ''}}">
+                  {{item.price === 0 ? '免费' : '¥' + item.price}}
+                </view>
+              </view>
+            </view>
+          </view>
+        </block>
+      </view>
+    </view>
+    
+    <!-- 底部安全区域 -->
+    <view class="safe-area"></view>
+  </scroll-view>
+
+  <!-- 底部结算栏 - 拼多多样式 -->
+  <view class="settle-bar" wx:if="{{!isEditMode && activeTab === 0}}">
+    <view class="settle-left">
+      <view class="select-all" bindtap="selectAllBooks">
+        <view class="all-checkbox {{isAllBooksSelected ? 'checked' : ''}}">
+          <text class="check-icon" wx:if="{{isAllBooksSelected}}">✓</text>
+        </view>
+        <text class="select-all-text">全选</text>
+      </view>
+      
+      <view class="selected-info" wx:if="{{selectedBooksCount > 0}}">
+        <text class="selected-count">已选{{selectedBooksCount}}款</text>
+        <view class="selected-price">
+          合计：<text class="total-price">¥{{totalPrice}}</text>
+        </view>
+      </view>
+      
+      <view class="selected-info" wx:if="{{selectedBooksCount === 0}}">
+        <text class="selected-count">请选择书籍</text>
+        <view class="selected-price">合计：¥0</view>
+      </view>
+    </view>
+    
+    <view class="settle-btn {{selectedBooksCount === 0 ? 'disabled' : ''}}" bindtap="goToSettle">
+      去结算
+    </view>
+  </view>
+
+  <!-- 资料操作栏 -->
+  <view class="material-bar" wx:if="{{!isEditMode && activeTab === 1}}">
+    <view class="settle-left">
+      <view class="select-all" bindtap="selectAllMaterials">
+        <view class="all-checkbox {{isAllMaterialsSelected ? 'checked' : ''}}">
+          <text class="check-icon" wx:if="{{isAllMaterialsSelected}}">✓</text>
+        </view>
+        <text class="select-all-text">全选</text>
+      </view>
+      
+      <view class="material-selected-info" wx:if="{{selectedMaterialsCount > 0}}">
+        <text class="material-count">已选{{selectedMaterialsCount}}款</text>
+        <view class="material-price-info" wx:if="{{totalMaterialPrice > 0}}">
+          需支付：<text class="paid-price">¥{{totalMaterialPrice}}</text>
+        </view>
+        <view class="material-price-info" wx:if="{{totalMaterialPrice === 0}}">
+          全部免费
+        </view>
+      </view>
+      
+      <view class="material-selected-info" wx:if="{{selectedMaterialsCount === 0}}">
+        <text class="material-count">请选择资料</text>
+        <view class="material-price-info">合计：¥0</view>
+      </view>
+    </view>
+    
+    <view class="download-btn {{selectedMaterialsCount === 0 ? 'disabled' : ''}}" bindtap="goToSettle">
+      去结算
+    </view>
+  </view>
+
+  <!-- 编辑模式操作栏 -->
+  <view class="edit-bar" wx:if="{{isEditMode}}">
+    <view class="select-all" bindtap="selectAllCurrent">
+      <view class="all-checkbox {{isAllCurrentSelected ? 'checked' : ''}}">
+        <text class="check-icon" wx:if="{{isAllCurrentSelected}}">✓</text>
+      </view>
+      <text class="select-all-text">全选</text>
+    </view>
+    
+    <view class="edit-selected-count" wx:if="{{selectedCount > 0}}">已选{{selectedCount}}项</view>
+    
+    <view class="edit-delete-btn {{selectedCount === 0 ? 'disabled' : ''}}" bindtap="deleteSelected">
+      删除
+    </view>
+  </view>
+</view>

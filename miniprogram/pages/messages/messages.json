@@ -1,0 +1,9 @@
+{
+  "usingComponents": {
+    "user-info-dialog": "../../components/user-info-dialog/user-info-dialog"
+  },
+  "navigationBarTitleText": "",
+  "backgroundTextStyle": "dark",
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 100
+}

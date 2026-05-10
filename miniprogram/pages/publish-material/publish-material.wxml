@@ -1,0 +1,198 @@
+<!-- pages/publish-material/publish-material.wxml -->
+<view class="container">
+  <!-- 头部导航 -->
+  <view class="header">
+    <view class="header-left">
+      <view class="back-btn" bindtap="goBack">
+        <text class="back-icon">‹</text>
+      </view>
+    </view>
+    <view class="header-center">
+      <text class="page-title">上传资料</text>
+    </view>
+    <view class="header-right">
+      <view 
+        class="submit-btn {{canUpload && !isUploading ? 'active' : ''}}" 
+        bindtap="uploadMaterial"
+      >
+        <text class="submit-text">{{isUploading ? '上传中...' : '上传'}}</text>
+        <view class="loading-spinner" wx:if="{{isUploading}}"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 主要内容区域 -->
+  <scroll-view class="content-area" scroll-y enhanced="{{true}}" show-scrollbar="{{false}}">
+    <!-- 预览图选择区域 -->
+    <view class="section">
+      <text class="section-title">预览图 *</text>
+      <view class="section-content">
+        <view class="file-upload-area" bindtap="choosePreviewImage">
+          <text class="upload-icon">🖼️</text>
+          <text class="upload-text">{{selectedPreviewImage ? selectedPreviewImage.name : '点击选择预览图'}}</text>
+          <text class="upload-hint">用于资料展示的首图</text>
+        </view>
+        <text class="file-size-hint" wx:if="{{selectedPreviewImage && previewImageSizeText}}">文件大小：{{previewImageSizeText}}</text>
+      </view>
+    </view>
+
+    <!-- PDF源文件选择区域 -->
+    <view class="section">
+      <text class="section-title">PDF源文件 *</text>
+      <view class="section-content">
+        <view class="file-upload-area" bindtap="chooseFile">
+          <text class="upload-icon">📄</text>
+          <text class="upload-text">{{selectedFile ? selectedFile.name : '点击选择PDF文件'}}</text>
+          <text class="upload-hint">仅支持PDF格式</text>
+        </view>
+        <text class="file-size-hint" wx:if="{{selectedFile && fileSizeText}}">文件大小：{{fileSizeText}}</text>
+      </view>
+    </view>
+
+    <!-- 资料信息填写 -->
+    <view class="section">
+      <text class="section-title">资料信息</text>
+      <view class="section-content">
+        <!-- 资料标题 -->
+        <view class="form-item">
+          <text class="form-label">资料标题 *</text>
+          <input 
+            class="form-input" 
+            placeholder="请输入资料标题" 
+            value="{{materialInfo.title}}" 
+            bindinput="bindInput" 
+            data-field="title"
+            maxlength="50"
+            adjust-position="{{true}}"
+          />
+        </view>
+
+        <!-- 资料描述 -->
+        <view class="form-item">
+          <text class="form-label">资料描述</text>
+          <textarea 
+            class="form-textarea" 
+            placeholder="请输入资料描述（可选）" 
+            value="{{materialInfo.description}}" 
+            bindinput="bindInput" 
+            data-field="description"
+            auto-height="{{true}}"
+            show-confirm-bar="{{false}}"
+            adjust-position="{{true}}"
+          />
+        </view>
+
+        <!-- 资料分类 -->
+        <view class="form-item">
+          <text class="form-label">资料分类 *</text>
+          <view class="category-selector">
+            <view 
+              class="category-option {{materialInfo.category === 'exam' ? 'active' : ''}}" 
+              bindtap="selectCategory"
+              data-category="exam"
+            >
+              <text class="category-icon">🎯</text>
+              <text class="category-name">真题</text>
+            </view>
+            <view 
+              class="category-option {{materialInfo.category === 'note' ? 'active' : ''}}" 
+              bindtap="selectCategory"
+              data-category="note"
+            >
+              <text class="category-icon">📝</text>
+              <text class="category-name">笔记</text>
+            </view>
+            <view 
+              class="category-option {{materialInfo.category === 'review' ? 'active' : ''}}" 
+              bindtap="selectCategory"
+              data-category="review"
+            >
+              <text class="category-icon">📚</text>
+              <text class="category-name">复习资料</text>
+            </view>
+            <view 
+              class="category-option {{materialInfo.category === 'none' ? 'active' : ''}}" 
+              bindtap="selectCategory"
+              data-category="none"
+            >
+              <text class="category-icon">📋</text>
+              <text class="category-name">无分类</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 资料价格 -->
+        <view class="form-item">
+          <text class="form-label">资料价格</text>
+          <view class="price-input-container">
+            <text class="price-symbol">¥</text>
+            <input 
+              class="price-input" 
+              type="number" 
+              placeholder="0" 
+              value="{{materialInfo.price}}" 
+              bindinput="bindInput" 
+              data-field="price"
+              min="0"
+              step="0.1"
+              adjust-position="{{true}}"
+            />
+            <text class="price-hint">设置为0则为免费资料</text>
+          </view>
+        </view>
+
+        <!-- 学号 -->
+        <view class="form-item">
+          <text class="form-label">学号 *</text>
+          <input 
+            class="form-input" 
+            placeholder="请输入学号" 
+            value="{{materialInfo.studentId}}" 
+            bindinput="bindInput" 
+            data-field="studentId"
+            adjust-position="{{true}}"
+          />
+        </view>
+      </view>
+    </view>
+
+    <!-- 版权承诺区域 -->
+    <view class="section">
+      <text class="section-title">版权承诺 *</text>
+      <view class="section-content">
+        <!-- 水印提示 -->
+        <view class="watermark-notice">
+          <view class="notice-icon">⚠️</view>
+          <text class="notice-title">重要提示</text>
+        </view>
+        <view class="watermark-content">
+          <text class="watermark-text">建议您在上传前自行给资料添加水印(含学号等标识)，以保护您的版权</text>
+        </view>
+
+        <!-- 版权承诺 -->
+        <view class="copyright-agree" bindtap="toggleCopyrightAgree">
+          <view class="checkbox {{copyrightAgree ? 'checked' : ''}}">
+            <text class="checkbox-icon" wx:if="{{copyrightAgree}}">✓</text>
+          </view>
+          <text class="copyright-text">
+            我承诺所上传的资料不存在版权问题，若有侵权行为，由我承担全部责任。
+          </text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部提示 -->
+    <view class="bottom-tip">
+      <text class="tip-text">提示：发布资料时请遵守相关法律法规，不要发布违规内容</text>
+    </view>
+    
+    <!-- 底部安全区域 -->
+    <view class="bottom-safe-area"></view>
+  </scroll-view>
+  
+  <!-- 水印处理用的 canvas (隐藏，宽高绑定data变量，防止图片被裁剪) -->
+  <canvas 
+    canvas-id="watermark-canvas" 
+    style="width: {{canvasWidth}}px; height: {{canvasHeight}}px; position: fixed; left: -9999px; top: -9999px;"
+  />
+</view>

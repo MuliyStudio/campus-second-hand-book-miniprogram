@@ -1,0 +1,9 @@
+{
+  "name": "getTempImageUrl",
+  "version": "1.0.0",
+  "description": "通过云函数管理员权限获取云存储文件的临时URL",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

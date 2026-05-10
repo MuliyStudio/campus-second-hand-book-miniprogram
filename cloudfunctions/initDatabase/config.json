@@ -1,0 +1,8 @@
+{
+  "name": "initDatabase",
+  "permissions": {},
+  "triggers": [],
+  "handler": "index.main",
+  "runtime": "Nodejs16.13",
+  "timeout": 10
+}

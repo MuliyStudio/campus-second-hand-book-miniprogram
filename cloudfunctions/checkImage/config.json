@@ -1,0 +1,12 @@
+{
+  "name": "checkImage",
+  "permissions": {
+    "openapi": [
+      "security.imgSecCheck"
+    ]
+  },
+  "triggers": [],
+  "handler": "index.main",
+  "runtime": "Nodejs16.13",
+  "timeout": 20
+}

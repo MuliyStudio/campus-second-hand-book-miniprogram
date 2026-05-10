@@ -1,0 +1,255 @@
+<view class="page-container">
+  <view class="header-section">
+    <view class="header-bg"></view>
+    <view class="header-content">
+      <view class="nav-bar">
+        <view class="nav-left" bindtap="goBack">
+          <view class="back-btn">
+            <view class="back-icon-line"></view>
+            <view class="back-icon-arrow"></view>
+          </view>
+        </view>
+        <view class="nav-center">
+          <text class="nav-title">我的帖子</text>
+        </view>
+        <view class="nav-right" bindtap="showStats">
+          <view class="stats-btn">
+            <view class="stats-icon-wrap">
+              <view class="stats-bar"></view>
+              <view class="stats-bar short"></view>
+              <view class="stats-bar medium"></view>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <view class="tab-section">
+        <view class="tab-wrapper">
+          <block wx:for="{{tabs}}" wx:key="id">
+            <view 
+              class="tab-item {{activeTab === item.id ? 'active' : ''}}" 
+              bindtap="switchTab" 
+              data-id="{{item.id}}"
+            >
+              <text class="tab-name">{{item.name}}</text>
+              <view class="tab-active-indicator"></view>
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="main-content">
+    <view class="empty-state" wx:if="{{!isLoading && posts.length === 0}}">
+      <view class="empty-visual">
+        <view class="empty-circle-outer"></view>
+        <view class="empty-circle-inner"></view>
+        <view class="empty-icon-wrap">
+          <view class="empty-doc">
+            <view class="doc-line"></view>
+            <view class="doc-line short"></view>
+            <view class="doc-line medium"></view>
+          </view>
+        </view>
+      </view>
+      <view class="empty-info">
+        <text class="empty-title">
+          {{activeTab === 'myPosts' ? '还没有发布帖子' : 
+           activeTab === 'likedPosts' ? '还没有赞过帖子' : '还没有收藏帖子'}}
+        </text>
+        <text class="empty-desc">
+          {{activeTab === 'myPosts' ? '分享你的学习心得，记录成长足迹' : 
+           activeTab === 'likedPosts' ? '去发现更多精彩内容吧' : '收藏有价值的内容，方便随时查看'}}
+        </text>
+      </view>
+      <view 
+        class="empty-action" 
+        bindtap="goToPublishPost" 
+        wx:if="{{activeTab === 'myPosts'}}"
+      >
+        <view class="action-btn-primary">
+          <view class="btn-icon-plus"></view>
+          <text class="btn-text">发布第一篇帖子</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="loading-state" wx:if="{{isLoading && posts.length === 0}}">
+      <view class="skeleton-list">
+        <view class="skeleton-card">
+          <view class="skeleton-header">
+            <view class="skeleton-avatar"></view>
+            <view class="skeleton-user-info">
+              <view class="skeleton-name"></view>
+              <view class="skeleton-time"></view>
+            </view>
+          </view>
+          <view class="skeleton-body">
+            <view class="skeleton-title"></view>
+            <view class="skeleton-text"></view>
+            <view class="skeleton-text short"></view>
+          </view>
+          <view class="skeleton-footer">
+            <view class="skeleton-stat"></view>
+            <view class="skeleton-stat"></view>
+            <view class="skeleton-stat"></view>
+          </view>
+        </view>
+        <view class="skeleton-card">
+          <view class="skeleton-header">
+            <view class="skeleton-avatar"></view>
+            <view class="skeleton-user-info">
+              <view class="skeleton-name"></view>
+              <view class="skeleton-time"></view>
+            </view>
+          </view>
+          <view class="skeleton-body">
+            <view class="skeleton-title"></view>
+            <view class="skeleton-text"></view>
+            <view class="skeleton-text short"></view>
+          </view>
+          <view class="skeleton-footer">
+            <view class="skeleton-stat"></view>
+            <view class="skeleton-stat"></view>
+            <view class="skeleton-stat"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <scroll-view 
+      scroll-y 
+      class="post-scroll-container"
+      wx:if="{{posts.length > 0}}"
+      refresher-enabled
+      refresher-triggered="{{isRefreshing}}"
+      bindrefresherrefresh="onRefresh"
+      bindscrolltolower="loadMorePosts"
+      enhanced
+      show-scrollbar="{{false}}"
+    >
+      <view class="post-list-container">
+        <block wx:for="{{posts}}" wx:key="_id">
+          <view class="post-card" data-id="{{item._id}}" bindtap="goToPostDetail">
+            <view class="post-card-inner">
+              <view class="post-header">
+                <view class="author-section">
+                  <view class="avatar-wrap">
+                    <image 
+                      class="author-avatar"
+                      src="{{item.authorInfo && item.authorInfo.avatarUrl ? item.authorInfo.avatarUrl : '/images/default-avatar.png'}}"
+                      mode="aspectFill"
+                      lazy-load
+                      binderror="onAvatarError"
+                      data-index="{{index}}"
+                    ></image>
+                  </view>
+                  <view class="author-info">
+                    <text class="author-name">{{item.authorInfo && item.authorInfo.nickname ? item.authorInfo.nickname : '匿名用户'}}</text>
+                    <text class="post-time">{{formatTime(item.createTime)}}</text>
+                  </view>
+                </view>
+                <view class="post-type-tag {{item.type}}">
+                  <text class="type-text">{{item.type === 'help' ? '求助' : item.type === 'share' ? '分享' : '经验'}}</text>
+                </view>
+              </view>
+
+              <view class="post-body">
+                <view class="post-title-row">
+                  <text class="post-title">{{item.title}}</text>
+                </view>
+                <view class="post-content-row">
+                  <text class="post-content">{{item.content}}</text>
+                </view>
+                
+                <view class="post-tags" wx:if="{{item.tags && item.tags.length > 0}}">
+                  <block wx:for="{{item.tags}}" wx:for-item="tag" wx:for-index="tagIndex" wx:key="*this">
+                    <view class="tag-chip" wx:if="{{tagIndex < 3}}">{{tag}}</view>
+                  </block>
+                  <view class="tag-more-chip" wx:if="{{item.tags.length > 3}}">+{{item.tags.length - 3}}</view>
+                </view>
+              </view>
+
+              <view class="post-stats">
+                <view class="stat-group">
+                  <view class="stat-item">
+                    <view class="stat-icon view-icon"></view>
+                    <text class="stat-value">{{item.viewCount || 0}}</text>
+                  </view>
+                  <view class="stat-item">
+                    <view class="stat-icon like-icon"></view>
+                    <text class="stat-value">{{item.likeCount || 0}}</text>
+                  </view>
+                  <view class="stat-item">
+                    <view class="stat-icon collect-icon"></view>
+                    <text class="stat-value">{{item.collectCount || 0}}</text>
+                  </view>
+                  <view class="stat-item">
+                    <view class="stat-icon comment-icon"></view>
+                    <text class="stat-value">{{item.commentCount || 0}}</text>
+                  </view>
+                </view>
+              </view>
+
+              <view class="post-actions" wx:if="{{activeTab === 'myPosts'}}" catchtap="preventBubble">
+                <view class="action-row">
+                  <view 
+                    class="action-btn {{item.isPublic ? 'is-public' : 'is-private'}}"
+                    catchtap="togglePostPublic"
+                    data-id="{{item._id}}"
+                  >
+                    <view class="action-icon {{item.isPublic ? 'public-icon' : 'private-icon'}}"></view>
+                    <text class="action-label">{{item.isPublic ? '公开' : '私密'}}</text>
+                  </view>
+                  <view class="action-btn" catchtap="sharePost" data-id="{{item._id}}">
+                    <view class="action-icon share-icon"></view>
+                    <text class="action-label">分享</text>
+                  </view>
+                  <view class="action-btn" catchtap="editPost" data-id="{{item._id}}">
+                    <view class="action-icon edit-icon"></view>
+                    <text class="action-label">编辑</text>
+                  </view>
+                  <view class="action-btn delete-btn" catchtap="deletePost" data-id="{{item._id}}">
+                    <view class="action-icon delete-icon"></view>
+                    <text class="action-label">删除</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </block>
+
+        <view class="load-more-section" wx:if="{{hasMore && posts.length > 0}}">
+          <view class="load-more-indicator">
+            <view class="loading-dots">
+              <view class="dot"></view>
+              <view class="dot"></view>
+              <view class="dot"></view>
+            </view>
+            <text class="load-more-text">加载更多</text>
+          </view>
+        </view>
+
+        <view class="no-more-section" wx:if="{{!hasMore && posts.length > 0}}">
+          <view class="end-line"></view>
+          <text class="end-text">已经到底啦</text>
+          <view class="end-line"></view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view 
+    class="fab-publish-btn" 
+    bindtap="goToPublishPost"
+    wx:if="{{activeTab === 'myPosts'}}"
+  >
+    <view class="fab-inner">
+      <view class="fab-plus-icon">
+        <view class="plus-h"></view>
+        <view class="plus-v"></view>
+      </view>
+    </view>
+  </view>
+</view>

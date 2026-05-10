@@ -1,0 +1,223 @@
+<!-- pages/book-detail/book-detail.wxml -->
+<view class="container">
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{isLoading && !bookInfo}}">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <view class="book-detail" wx:else>
+    <!-- 返回按钮 -->
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-icon">←</text>
+    </view>
+
+    <!-- 书籍图片轮播 -->
+    <view class="book-image-container">
+      <swiper 
+        class="book-swiper" 
+        indicator-dots="{{bookInfo.images.length > 1}}"
+        autoplay="{{false}}"
+        interval="3000"
+        duration="300"
+        circular="{{true}}"
+        indicator-color="rgba(255, 255, 255, 0.5)"
+        indicator-active-color="#667eea"
+        bindchange="onSwiperChange"
+      >
+        <block wx:for="{{bookInfo.images}}" wx:key="index">
+          <swiper-item>
+            <image 
+              src="{{item}}" 
+              class="book-image" 
+              mode="aspectFill" 
+              bindtap="previewImage"
+              data-index="{{index}}"
+            ></image>
+          </swiper-item>
+        </block>
+      </swiper>
+      <view class="book-image-counter" wx:if="{{bookInfo.images.length > 1}}">
+        <text class="counter-text">{{currentImageIndex + 1}}/{{bookInfo.images.length}}</text>
+      </view>
+      <view class="book-status-tag {{bookInfo.status}}">
+        <text class="status-text">{{bookInfo.statusText}}</text>
+      </view>
+    </view>
+
+    <!-- 主要内容区域 -->
+    <scroll-view 
+      scroll-y="true" 
+      class="content-area" 
+      scroll-top="0"
+      enable-back-to-top
+      scroll-with-animation
+      bindscrolltolower="onReachBottom"
+    >
+      <!-- 书籍基本信息 -->
+      <view class="book-basic-card">
+        <view class="book-header">
+          <text class="book-title">{{bookInfo.title}}</text>
+          <text class="book-price">¥{{bookInfo.price}}</text>
+        </view>
+        
+        <view class="book-meta">
+          <view class="meta-item">
+            <text class="meta-label">作者:</text>
+            <text class="meta-value">{{bookInfo.author}}</text>
+          </view>
+          <view class="meta-item">
+            <text class="meta-label">出版社:</text>
+            <text class="meta-value">{{bookInfo.publisher}}</text>
+          </view>
+        </view>
+
+        <view class="book-tags">
+          <view class="book-tag course">
+            <text class="tag-text">{{bookInfo.course}}</text>
+          </view>
+          <view class="book-tag condition">
+            <text class="tag-text">{{bookInfo.conditionText}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 书籍描述 -->
+      <view class="description-card">
+        <text class="description-title">书籍描述</text>
+        <text class="description-content">{{bookInfo.description || '无'}}</text>
+      </view>
+
+      <!-- 卖家信息 -->
+      <view class="seller-card">
+        <text class="section-title">卖家信息</text>
+        <view class="seller-info" bindtap="goToSellerProfile">
+          <image src="{{bookInfo.sellerAvatar}}" class="seller-avatar"></image>
+          <view class="seller-details">
+            <view class="seller-name-row">
+              <text class="seller-name">{{bookInfo.sellerName}}</text>
+              <!-- 已认证标签 -->
+              <view class="verified-badge" wx:if="{{bookInfo.sellerVerified}}">
+                <text class="verified-icon">✓</text>
+                <text class="verified-text">已认证</text>
+              </view>
+              <view class="view-profile-arrow">
+                <text class="arrow-icon">›</text>
+              </view>
+            </view>
+
+            <!-- 卖家位置信息 -->
+            <view class="seller-location">
+              <view class="location-item campus">{{bookInfo.sellerCampus}}</view>
+              <view class="location-item dorm">{{bookInfo.sellerDorm}}</view>
+              <view class="location-item college">{{bookInfo.sellerCollege}}</view>
+              <view class="location-item major">{{bookInfo.sellerMajor}}</view>
+            </view>
+
+            <view class="seller-stats">
+              <view class="stat-item">
+                <text class="stat-value">{{bookInfo.sellerCredit}}</text>
+                <text class="stat-label">信用分</text>
+              </view>
+              <view class="stat-item">
+                <text class="stat-value">{{bookInfo.sellerRating}}%</text>
+                <text class="stat-label">好评率</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        <view wx:if="{{isOwnBook}}" class="contact-btn" bindtap="toggleShelve">
+          <text class="contact-text">{{bookInfo.status === 'available' ? '暂时下架' : '重新上架'}}</text>
+        </view>
+        <view wx:else class="contact-btn" bindtap="contactSeller">
+          <text class="contact-text">私信卖家</text>
+        </view>
+      </view>
+
+      <!-- 卖家其他书籍 -->
+      <view class="seller-books-card" wx:if="{{sellerBooks && sellerBooks.length > 0}}">
+        <text class="section-title">{{bookInfo.sellerName}} 的其他书籍</text>
+        <scroll-view scroll-x="true" class="seller-books-scroll">
+          <view class="seller-books-list">
+            <block wx:for="{{sellerBooks}}" wx:key="_id">
+              <view class="seller-book-item" bindtap="goToRelatedBook" data-id="{{item._id}}">
+                <image src="{{item.coverUrl}}" class="seller-book-cover"></image>
+                <view class="seller-book-info">
+                  <text class="seller-book-title">{{item.title}}</text>
+                  <text class="seller-book-price">¥{{item.price}}</text>
+                </view>
+              </view>
+            </block>
+          </view>
+        </scroll-view>
+      </view>
+
+      <!-- 无其他书籍提示 -->
+      <view class="no-other-books" wx:if="{{!sellerBooks || sellerBooks.length === 0}}">
+        <view class="no-books-icon">📚</view>
+        <text class="no-books-text">暂无其他在售书籍</text>
+      </view>
+
+      <!-- 底部安全空间 -->
+      <view class="bottom-safe-area"></view>
+    </scroll-view>
+
+    <!-- 底部操作栏 - 根据图片改为三个按钮 -->
+    <view class="action-bar">
+      <view class="action-buttons">
+        <!-- 收藏按钮 -->
+        <view class="action-btn favorite {{isFavorite ? 'active' : ''}}" bindtap="toggleFavorite">
+          <view class="btn-icon-container">
+            <text class="btn-icon">{{isFavorite ? '❤️' : '🤍'}}</text>
+          </view>
+          <text class="btn-text">{{isFavorite ? '已收藏' : '收藏'}}</text>
+        </view>
+        
+        <!-- 分享按钮 -->
+        <view class="action-btn share" bindtap="shareBook">
+          <view class="btn-icon-container">
+            <text class="btn-icon">↗️</text>
+          </view>
+          <text class="btn-text">分享</text>
+        </view>
+
+        <!-- 举报按钮 - 只显示给非书籍所有者 -->
+        <view wx:if="{{!isOwnBook}}" class="action-btn report" bindtap="reportBook">
+          <view class="btn-icon-container">
+            <text class="btn-icon">⚠️</text>
+          </view>
+          <text class="btn-text">举报</text>
+        </view>
+
+        <!-- 自己的书籍：显示上架/下架按钮 -->
+        <view wx:if="{{isOwnBook}}" class="action-btn reserve" bindtap="toggleShelve">
+          <text class="reserve-text">{{bookInfo.status === 'available' ? '暂时下架' : '重新上架'}}</text>
+        </view>
+        
+        <!-- 显示预定按钮 -->
+        <view wx:elif="{{bookInfo.status === 'available'}}" class="action-btn reserve {{isReserved ? 'active' : ''}}" bindtap="toggleReserve">
+          <text class="reserve-text">{{isReserved ? '已预定' : '立即预定'}}</text>
+        </view>
+        
+        <!-- 已被预定 - 区分买家和非买家 -->
+        <!-- 买家显示取消订单按钮 -->
+        <view wx:elif="{{bookInfo.status === 'reserved' && isBuyer}}" class="action-btn status-cancel" bindtap="cancelOrder">
+          <text class="status-text">❌ 取消订单</text>
+        </view>
+        <!-- 非买家显示已被预定 -->
+        <view wx:elif="{{bookInfo.status === 'reserved' && !isBuyer}}" class="action-btn status-reserved">
+          <text class="status-text">⏳ 已被预定</text>
+        </view>
+        
+        <!-- 已售出 -->
+        <view wx:elif="{{bookInfo.status === 'sold'}}" class="action-btn status-sold">
+          <text class="status-text">💰 已售出</text>
+        </view>
+        
+        <!-- 已下架 -->
+        <view wx:else class="action-btn status-unavailable">
+          <text class="status-text">📴 已下架</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

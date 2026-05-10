@@ -1,0 +1,74 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/discover/discover",
+    "pages/messages/messages",
+    "pages/mine/mine",
+    "pages/user-center/user-center",
+    "pages/material-detail/material-detail",
+    "pages/book-detail/book-detail",
+    "pages/publish-book/publish-book",
+    "pages/publish-material/publish-material",
+    "pages/favorites/favorites",
+    "pages/category/category",
+    "pages/search/search",
+    "pages/chat/chat",
+    "pages/post-detail/post-detail",
+    "pages/publish-post/publish-post",
+    "pages/upload-management/upload-management",
+    "pages/my-orders/my-orders",
+    "pages/my-downloads/my-downloads",
+    "pages/customer-service/customer-service",
+    "pages/my-posts/my-posts",
+    "pages/login/login",
+    "pages/complete-info/complete-info",
+    "pages/edit-profit/edit-profit",
+    "pages/database-init/database-init"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "",
+    "navigationBarTextStyle": "black",
+    "enablePullDownRefresh": true
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#667eea",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "iconPath": "images/tab-home.png",
+        "selectedIconPath": "images/tab-home-active.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/discover/discover",
+        "iconPath": "images/tab-discover.png",
+        "selectedIconPath": "images/tab-discover-active.png",
+        "text": "发现"
+      },
+      {
+        "pagePath": "pages/messages/messages",
+        "iconPath": "images/tab-message.png",
+        "selectedIconPath": "images/tab-message-active.png",
+        "text": "消息"
+      },
+      {
+        "pagePath": "pages/mine/mine",
+        "iconPath": "images/tab-mine.png",
+        "selectedIconPath": "images/tab-mine-active.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "networkTimeout": {
+    "request": 10000
+  },
+  "debug": true,
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "subPackages": []
+}

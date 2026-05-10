@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "openapi": [],
+    "database": {
+      "collection": [
+        {
+          "name": "comments",
+          "permission": ["read", "write"]
+        },
+        {
+          "name": "posts",
+          "permission": ["read", "write"]
+        }
+      ]
+    }
+  }
+}

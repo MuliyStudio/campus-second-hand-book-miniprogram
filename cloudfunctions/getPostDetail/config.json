@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "openapi": [],
+    "db": {
+      "cloudfunction": true
+    }
+  },
+  "timeout": 30
+}

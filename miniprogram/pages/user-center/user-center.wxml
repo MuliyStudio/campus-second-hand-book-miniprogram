@@ -1,0 +1,323 @@
+<!-- pages/user-center/user-center.wxml -->
+<view class="container">
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{isLoading && !userInfo}}">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <view class="user-content" wx:else>
+    <!-- 返回按钮 -->
+    <view class="back-button" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    
+    <!-- 用户信息头部 - 紫色渐变背景 -->
+    <view class="user-header">
+      <!-- 用户信息卡片 -->
+      <view class="user-card">
+        <!-- 用户基本信息 -->
+        <view class="user-basic-info">
+          <view class="user-avatar" bindtap="goToEditProfile">
+            <image wx:if="{{userInfo.avatarUrl}}" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+            <view wx:else class="avatar-placeholder">{{userInfo.nickname.charAt(0)}}</view>
+          </view>
+          
+          <view class="user-main-info">
+            <view class="user-name-row">
+              <text class="user-name">{{userInfo.nickname}}</text>
+              <view class="verified-badge" wx:if="{{userInfo.isVerified}}">
+                <text class="verified-icon">✓</text>
+                <text class="verified-text">已认证</text>
+              </view>
+            </view>
+            
+            <view class="user-meta">
+              <view class="meta-item">
+                <text class="meta-label">学号:</text>
+                <text class="meta-value">{{userInfo.studentId}}</text>
+              </view>
+              <view class="meta-item">
+                <text class="meta-label">年级:</text>
+                <text class="meta-value">{{userInfo.grade}}级</text>
+              </view>
+            </view>
+            
+            <view class="user-tags">
+              <view class="user-tag campus">{{userInfo.campus}}</view>
+              <view class="user-tag dorm" wx:if="{{userInfo.dorm}}">{{userInfo.dorm}}</view>
+              <view class="user-tag college">{{userInfo.college}}</view>
+              <view class="user-tag major">{{userInfo.major}}</view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 用户简介 -->
+        <view class="user-bio">
+          <text class="bio-text">{{userInfo.bio}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 白色内容区域 -->
+    <view class="content-white">
+      <!-- 用户统计数据 -->
+      <view class="user-stats">
+        <view class="stat-item" bindtap="switchTab" data-tab="books">
+          <text class="stat-number">{{userInfo.booksCount}}</text>
+          <text class="stat-label">发布</text>
+        </view>
+        <view class="stat-item" bindtap="switchTab" data-tab="materials">
+          <text class="stat-number">{{userInfo.materialsCount}}</text>
+          <text class="stat-label">上传</text>
+        </view>
+        <view class="stat-item" bindtap="switchTab" data-tab="favorites">
+          <text class="stat-number">{{userInfo.favoritesCount}}</text>
+          <text class="stat-label">收藏</text>
+        </view>
+        <view class="stat-item" bindtap="switchTab" data-tab="posts">
+          <text class="stat-number">{{userInfo.postsCount}}</text>
+          <text class="stat-label">帖子</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-number">{{userInfo.likesCount}}</text>
+          <text class="stat-label">获赞</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-number">{{userInfo.creditScore}}</text>
+          <text class="stat-label">信用分</text>
+        </view>
+      </view>
+
+      <!-- 操作按钮 - 编辑资料和分享在同一行 -->
+      <view class="action-buttons">
+        <view wx:if="{{!isOwnProfile}}" class="action-group">
+          <view class="action-btn follow {{userInfo.isFollowing ? 'following' : ''}}" bindtap="followUser">
+            <text class="action-icon">{{userInfo.isFollowing ? '✓' : '+'}}</text>
+            <text class="action-text">{{userInfo.isFollowing ? '已关注' : '关注'}}</text>
+          </view>
+          <view class="action-btn message" bindtap="sendMessage">
+            <text class="action-icon">💬</text>
+            <text class="action-text">私信</text>
+          </view>
+        </view>
+        
+        <view wx:else class="action-group">
+          <view class="action-btn edit" bindtap="goToEditProfile">
+            <text class="action-icon">✏️</text>
+            <text class="action-text">编辑资料</text>
+          </view>
+          <view class="action-btn share" bindtap="shareProfile">
+            <text class="action-icon">↗️</text>
+            <text class="action-text">分享</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 标签切换 -->
+      <view class="tab-bar">
+        <view
+          class="tab-item {{currentTab === 'books' ? 'active' : ''}}"
+          data-tab="books"
+          bindtap="switchTab"
+        >
+          <text class="tab-text">{{isOwnProfile ? '我的发布' : '他的发布'}}</text>
+          <text class="tab-count">{{userInfo.booksCount}}</text>
+        </view>
+        <view
+          class="tab-item {{currentTab === 'materials' ? 'active' : ''}}"
+          data-tab="materials"
+          bindtap="switchTab"
+        >
+          <text class="tab-text">{{isOwnProfile ? '我的上传' : '他的上传'}}</text>
+          <text class="tab-count">{{userInfo.materialsCount}}</text>
+        </view>
+        <view
+          class="tab-item {{currentTab === 'favorites' ? 'active' : ''}}"
+          data-tab="favorites"
+          bindtap="switchTab"
+        >
+          <text class="tab-text">{{isOwnProfile ? '我的收藏' : '他的收藏'}}</text>
+          <text class="tab-count">{{userInfo.favoritesCount}}</text>
+        </view>
+        <view
+          class="tab-item {{currentTab === 'posts' ? 'active' : ''}}"
+          data-tab="posts"
+          bindtap="switchTab"
+        >
+          <text class="tab-text">{{isOwnProfile ? '我的帖子' : '他的帖子'}}</text>
+          <text class="tab-count">{{userInfo.postsCount}}</text>
+        </view>
+      </view>
+
+      <!-- 内容区域 -->
+      <scroll-view 
+        scroll-y="true" 
+        class="content-area" 
+        refresher-enabled="{{true}}"
+        refresher-triggered="{{isRefreshing}}"
+        bindrefresherrefresh="onRefresh"
+        bindscrolltolower="loadMoreData"
+      >
+        <!-- 我的发布 - 书籍列表 -->
+        <view class="tab-content" wx:if="{{currentTab === 'books'}}">
+          <view class="books-grid">
+            <block wx:for="{{books}}" wx:key="_id">
+              <view class="book-item" bindtap="goToBookDetail" data-id="{{item._id}}">
+                <view class="book-image-container">
+                  <image src="{{item.coverUrl}}" class="book-image" mode="aspectFill"></image>
+                  <view class="book-status {{item.status}}">{{item.statusText}}</view>
+                  <view class="book-condition">{{item.conditionText}}成新</view>
+                </view>
+                
+                <view class="book-info">
+                  <text class="book-title">{{item.title}}</text>
+                  <view class="book-meta">
+                    <text class="book-course">{{item.course}}</text>
+                  </view>
+                  <view class="book-footer">
+                    <text class="book-price">¥{{item.price}}</text>
+                    <view class="book-stats">
+                      <view class="stat">
+                        <text class="stat-icon">📥</text>
+                        <text class="stat-count">{{item.favoritesCount}}</text>
+                      </view>
+                      <view class="stat">
+                        <text class="stat-icon">👁️</text>
+                        <text class="stat-count">{{item.viewCount}}</text>
+                      </view>
+                    </view>
+                  </view>
+                </view>
+              </view>
+            </block>
+          </view>
+        </view>
+
+        <!-- 我的上传 - 资料列表 -->
+        <view class="tab-content" wx:if="{{currentTab === 'materials'}}">
+          <view class="materials-list">
+            <block wx:for="{{materials}}" wx:key="_id">
+              <view class="material-item" bindtap="goToMaterialDetail" data-id="{{item._id}}">
+                <view class="material-icon" style="background: {{item.isFree ? '#e8f5e9' : '#fff3e0'}}; color: {{item.isFree ? '#2e7d32' : '#ef6c00'}}">
+                  <text class="icon-text">📄</text>
+                </view>
+                
+                <view class="material-content">
+                  <view class="material-header">
+                    <text class="material-title">{{item.title}}</text>
+                    <view class="material-type">{{item.type}}</view>
+                  </view>
+                  
+                  <view class="material-meta">
+                    <text class="file-size">{{item.fileSize}}</text>
+                    <text class="file-format">{{item.format}}</text>
+                    <text class="material-price {{item.isFree ? 'free' : 'paid'}}">
+                      {{item.isFree ? '免费' : '¥' + item.price}}
+                    </text>
+                  </view>
+                  
+                  <view class="material-stats">
+                    <view class="stat">
+                      <text class="stat-icon">⬇️</text>
+                      <text class="stat-count">{{item.downloadCount}}</text>
+                    </view>
+                    <view class="stat">
+                      <text class="stat-icon">📥</text>
+                      <text class="stat-count">{{item.favoritesCount}}</text>
+                    </view>
+                    <view class="stat">
+                      <text class="stat-icon">❤️</text>
+                      <text class="stat-count">{{item.likeCount}}</text>
+                    </view>
+                  </view>
+                </view>
+              </view>
+            </block>
+          </view>
+        </view>
+
+        <!-- 我的收藏 -->
+        <view class="tab-content" wx:if="{{currentTab === 'favorites'}}">
+          <view class="favorites-list">
+            <block wx:for="{{favorites}}" wx:key="_id">
+              <view class="favorite-item">
+                <view class="favorite-icon" style="background: {{item.type === 'book' ? '#e3f2fd' : item.type === 'material' ? '#fff3e0' : '#f3e5f5'}}; color: {{item.type === 'book' ? '#1976d2' : item.type === 'material' ? '#ef6c00' : '#7b1fa2'}}">
+                  <text class="icon-text">{{item.type === 'book' ? '📚' : item.type === 'material' ? '📄' : '💬'}}</text>
+                </view>
+
+                <view class="favorite-content">
+                  <text class="favorite-title">{{item.itemData.title || item.title}}</text>
+                  <view class="favorite-meta">
+                    <text class="favorite-type">{{item.type === 'book' ? '书籍' : item.type === 'material' ? '资料' : '帖子'}}</text>
+                  </view>
+                  <text class="favorite-time">{{item.formattedTime || item.createTime}}</text>
+                </view>
+              </view>
+            </block>
+          </view>
+        </view>
+
+        <!-- 我的帖子 -->
+        <view class="tab-content" wx:if="{{currentTab === 'posts'}}">
+          <view class="posts-list">
+            <block wx:for="{{posts}}" wx:key="_id">
+              <view class="post-item" bindtap="goToPostDetail" data-id="{{item._id}}">
+                <view class="post-type {{item.type}}">{{item.type === 'help' ? '求助' : '分享'}}</view>
+                <view class="post-content-main">
+                  <text class="post-title">{{item.title}}</text>
+                  <text class="post-content">{{item.content}}</text>
+                  <view class="post-stats-wrapper">
+                    <view class="post-stat-item">
+                      <text class="post-stat-icon">❤️</text>
+                      <text class="post-stat-count">{{item.likeCount}}</text>
+                    </view>
+                    <view class="post-stat-item">
+                      <text class="post-stat-icon">⭐</text>
+                      <text class="post-stat-count">{{item.favoritesCount}}</text>
+                    </view>
+                    <view class="post-stat-item">
+                      <text class="post-stat-icon">💬</text>
+                      <text class="post-stat-count">{{item.commentCount}}</text>
+                    </view>
+                  </view>
+                </view>
+              </view>
+            </block>
+          </view>
+        </view>
+
+        <!-- 空状态 -->
+        <view class="empty-state" wx:if="{{(currentTab === 'books' && books.length === 0) || (currentTab === 'materials' && materials.length === 0) || (currentTab === 'favorites' && favorites.length === 0) || (currentTab === 'posts' && posts.length === 0)}}">
+          <view class="empty-icon">
+            <text wx:if="{{currentTab === 'books'}}">📚</text>
+            <text wx:if="{{currentTab === 'materials'}}">📤</text>
+            <text wx:if="{{currentTab === 'favorites'}}">❤️</text>
+            <text wx:if="{{currentTab === 'posts'}}">💬</text>
+          </view>
+          <text class="empty-text">
+            <text wx:if="{{currentTab === 'books'}}">{{isOwnProfile ? '暂无发布的书籍' : '他暂无发布的书籍'}}</text>
+            <text wx:if="{{currentTab === 'materials'}}">{{isOwnProfile ? '暂无上传的资料' : '他暂无上传的资料'}}</text>
+            <text wx:if="{{currentTab === 'favorites'}}">{{isOwnProfile ? '暂无收藏的内容' : '他暂无收藏的内容'}}</text>
+            <text wx:if="{{currentTab === 'posts'}}">{{isOwnProfile ? '暂无发布的帖子' : '他暂无发布的帖子'}}</text>
+          </text>
+          <text class="empty-tip">{{isOwnProfile ? '去发布一些内容吧' : '去看看其他内容吧'}}</text>
+        </view>
+
+        <!-- 加载更多 -->
+        <view class="load-more" wx:if="{{hasMore && !isLoading}}">
+          <text class="load-text">上拉加载更多</text>
+          <view class="load-icon">⬇️</view>
+        </view>
+        
+        <view class="no-more" wx:if="{{!hasMore && (
+          (currentTab === 'books' && books.length > 0) ||
+          (currentTab === 'materials' && materials.length > 0) ||
+          (currentTab === 'favorites' && favorites.length > 0) ||
+          (currentTab === 'posts' && posts.length > 0)
+        )}}">
+          <text>没有更多了</text>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+</view>

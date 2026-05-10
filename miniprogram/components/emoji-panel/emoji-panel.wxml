@@ -1,0 +1,40 @@
+<!-- components/emoji-panel/emoji-panel.wxml -->
+<view class="emoji-panel-container" wx:if="{{visible}}">
+  <!-- 遮罩层 -->
+  <view class="emoji-panel-overlay" catchtap="onClose"></view>
+  
+  <!-- 表情面板 -->
+  <view class="emoji-panel">
+    <!-- 面板头部 -->
+    <view class="emoji-panel-header">
+      <view class="emoji-tabs">
+        <view class="emoji-tab active">
+          <text class="tab-text">表情</text>
+        </view>
+      </view>
+      <view class="emoji-panel-close" catchtap="onClose">
+        <text class="close-icon">×</text>
+      </view>
+    </view>
+    
+    <!-- 表情内容区域 -->
+    <view class="emoji-content-container">
+      <scroll-view scroll-y class="emoji-content">
+        <!-- 所有表情 -->
+        <view class="emoji-section">
+          <view class="emoji-grid">
+            <block wx:for="{{allEmojis}}" wx:key="index">
+              <view class="emoji-item" catchtap="onEmojiTap" data-emoji="{{item}}">
+                <text class="emoji">{{item}}</text>
+              </view>
+            </block>
+          </view>
+        </view>
+      </scroll-view>
+      <!-- 固定删除键 -->
+      <view class="fixed-delete-btn" catchtap="onDeleteEmoji">
+        <text class="delete-icon">⌫</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,280 @@
+/* pages/my-downloads/my-downloads.wxss */
+/* 容器样式 */
+.container {
+  width: 100vw;
+  min-height: 100vh;
+  background: #f8f9fa;
+  box-sizing: border-box;
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: constant(safe-area-inset-bottom);
+}
+
+/* 顶部导航 */
+.header {
+  width: 100%;
+  background: #667eea;
+  color: white;
+  padding: 30rpx 0;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 2rpx 10rpx rgba(102, 126, 234, 0.3);
+}
+
+.header-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* 内容区域 */
+.content-section {
+  width: 100%;
+  padding: 20rpx;
+  box-sizing: border-box;
+  background: #f8f9fa;
+  min-height: 60vh;
+}
+
+/* 加载状态 */
+.loading {
+  width: 100%;
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 28rpx;
+  background: white;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 空状态 */
+.empty {
+  width: 100%;
+  text-align: center;
+  padding: 120rpx 40rpx;
+  background: white;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.6;
+  color: #667eea;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 30rpx;
+  line-height: 1.4;
+}
+
+.empty-btn {
+  display: inline-block;
+  padding: 16rpx 40rpx;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-radius: 25rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2rpx 8rpx rgba(102, 126, 234, 0.3);
+}
+
+.empty-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 1rpx 4rpx rgba(102, 126, 234, 0.3);
+}
+
+/* 下载列表 */
+.downloads-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+/* 下载项 */
+.download-item {
+  width: 100%;
+  background: white;
+  border-radius: 12rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  transition: all 0.3s;
+  border: 1rpx solid #f0f0f0;
+}
+
+.download-item:active {
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  transform: translateY(-2rpx);
+}
+
+/* 项头部 */
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  background: linear-gradient(135deg, #f8f9fa, #f0f0f0);
+}
+
+.item-title {
+  flex: 1;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  padding-right: 20rpx;
+}
+
+.item-type {
+  font-size: 20rpx;
+  font-weight: 600;
+  padding: 6rpx 12rpx;
+  border-radius: 8rpx;
+  white-space: nowrap;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  border: 1rpx solid rgba(102, 126, 234, 0.2);
+  flex-shrink: 0;
+}
+
+/* 项信息 */
+.item-info {
+  padding: 20rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+
+.label {
+  font-size: 24rpx;
+  color: #666;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.value {
+  font-size: 24rpx;
+  color: #333;
+  line-height: 1.4;
+  flex: 1;
+  word-break: break-word;
+}
+
+/* 项底部 */
+.item-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  border-top: 1rpx solid #f0f0f0;
+  background: #f8f9fa;
+}
+
+.price {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #FA5151;
+  line-height: 1.2;
+}
+
+.price.free {
+  color: #07C160;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  gap: 12rpx;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.action-btn {
+  padding: 12rpx 24rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: 1rpx solid transparent;
+  white-space: nowrap;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.1);
+}
+
+.action-btn.download {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+  border-color: #8b5cf6;
+  box-shadow: 0 2rpx 8rpx rgba(139, 92, 246, 0.3);
+}
+
+.action-btn.delete {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* 响应式调整 */
+@media (max-width: 375px) {
+  .header {
+    padding: 25rpx 0;
+  }
+  
+  .header-title {
+    font-size: 32rpx;
+  }
+  
+  .item-title {
+    font-size: 26rpx;
+  }
+  
+  .actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .action-btn {
+    width: 100%;
+  }
+  
+  .item-footer {
+    flex-direction: column;
+    gap: 15rpx;
+  }
+  
+  .price {
+    align-self: flex-start;
+  }
+}

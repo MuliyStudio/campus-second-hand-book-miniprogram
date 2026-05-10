@@ -1,0 +1,149 @@
+<!-- pages/edit-profit/edit-profit.wxml -->
+<view class="container">
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{isLoading}}">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <view class="edit-content" wx:else>
+    <!-- 头像编辑 -->
+    <view class="section">
+      <view class="section-title">头像</view>
+      <view class="avatar-section">
+        <view class="avatar-container" bindtap="chooseAvatar">
+          <image wx:if="{{formData.avatarUrl}}" src="{{formData.avatarUrl}}" class="avatar"></image>
+          <view wx:else class="avatar-placeholder">{{formData.nickname.charAt(0) || '我'}}</view>
+          <view class="avatar-upload-icon">📷</view>
+        </view>
+        <text class="avatar-hint">点击更换头像</text>
+      </view>
+    </view>
+
+    <!-- 基本信息 -->
+    <view class="section">
+      <view class="section-title">基本信息</view>
+      
+      <view class="form-item">
+        <text class="form-label">昵称</text>
+        <input 
+          class="form-input" 
+          value="{{formData.nickname}}" 
+          bindinput="onNicknameChange" 
+          placeholder="请输入昵称"
+          maxlength="20"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">学号</text>
+        <input 
+          class="form-input" 
+          value="{{formData.studentId}}" 
+          bindinput="onStudentIdChange" 
+          placeholder="请输入学号"
+          maxlength="20"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">年级</text>
+        <picker 
+          class="form-picker" 
+          value="{{gradeIndex}}" 
+          range="{{gradeOptions}}" 
+          bindchange="onGradeChange"
+        >
+          <view class="picker-content">
+            {{formData.grade || '请选择年级'}}
+          </view>
+        </picker>
+      </view>
+    </view>
+
+    <!-- 学校信息 -->
+    <view class="section">
+      <view class="section-title">学校信息</view>
+      
+      <view class="form-item">
+        <text class="form-label">校区</text>
+        <picker 
+          class="form-picker" 
+          value="{{campusIndex}}" 
+          range="{{campusOptions}}" 
+          bindchange="onCampusChange"
+        >
+          <view class="picker-content">
+            {{formData.campus || '请选择校区'}}
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">宿舍苑栋</text>
+        <picker 
+          class="form-picker" 
+          value="{{dormIndex}}" 
+          range="{{dormOptions}}" 
+          bindchange="onDormChange"
+          disabled="{{isDormDisabled}}"
+        >
+          <view class="picker-content">
+            {{formData.dorm || '请选择宿舍'}}{{isDormDisabled ? '(东校区默认东苑)' : ''}}
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">学院</text>
+        <picker 
+          class="form-picker" 
+          value="{{collegeIndex}}" 
+          range="{{collegeOptions}}" 
+          bindchange="onCollegeChange"
+        >
+          <view class="picker-content">
+            {{formData.college || '请选择学院'}}
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">专业</text>
+        <picker 
+          class="form-picker" 
+          value="{{majorIndex}}" 
+          range="{{majorOptions}}" 
+          bindchange="onMajorChange"
+        >
+          <view class="picker-content">
+            {{formData.major || '请选择专业'}}
+          </view>
+        </picker>
+      </view>
+    </view>
+
+    <!-- 个人简介 -->
+    <view class="section">
+      <view class="section-title">个人简介</view>
+      <textarea 
+        class="form-textarea" 
+        value="{{formData.bio}}" 
+        bindinput="onBioChange" 
+        placeholder="介绍一下自己吧~"
+        maxlength="200"
+        auto-height
+      ></textarea>
+      <text class="textarea-count">{{formData.bio.length || 0}}/200</text>
+    </view>
+
+    <!-- 保存按钮 -->
+    <view class="save-section">
+      <button class="save-btn" bindtap="saveProfile" wx:if="{{!isSubmitting}}">
+        保存修改
+      </button>
+      <button class="save-btn disabled" disabled wx:else>
+        保存中...
+      </button>
+    </view>
+  </view>
+</view>

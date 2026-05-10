@@ -1,0 +1,37 @@
+/* pages/complete-info.wxss */
+.container {
+  padding: 20rpx;
+  background: #f5f5f5;
+}
+.form-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 40rpx;
+  text-align: center;
+}
+.input-item {
+  background: white;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  border-radius: 10rpx;
+  display: flex;
+  align-items: center;
+}
+.input-item text {
+  width: 120rpx;
+  font-size: 32rpx;
+}
+.input-item input,
+.input-item view {
+  flex: 1;
+  font-size: 32rpx;
+  margin-left: 20rpx;
+}
+.radio-label {
+  margin-right: 30rpx;
+}
+.submit-btn {
+  margin-top: 50rpx;
+  background: #007AFF;
+  color: white;
+}

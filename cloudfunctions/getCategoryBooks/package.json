@@ -1,0 +1,9 @@
+{
+  "name": "getCategoryBooks",
+  "version": "1.0.0",
+  "description": "获取基于学院专业分类的书籍数据",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

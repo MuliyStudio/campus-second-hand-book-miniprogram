@@ -1,0 +1,9 @@
+{
+  "name": "notifyNewMessage",
+  "version": "1.0.0",
+  "description": "通知用户有新消息",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

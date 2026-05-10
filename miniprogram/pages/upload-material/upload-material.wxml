@@ -1,0 +1,164 @@
+<!-- pages/upload-material/upload-material.wxml -->
+<view class="container">
+  <!-- 返回按钮 -->
+  <view class="back-btn" bindtap="goBack">
+    <text class="back-icon">←</text>
+  </view>
+
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">上传资料</text>
+  </view>
+
+  <!-- 主要内容区域 -->
+  <scroll-view 
+    scroll-y="true" 
+    class="content-area" 
+    scroll-top="0"
+    enable-back-to-top
+  >
+    <!-- 文件选择区域 -->
+    <view class="file-upload-section">
+      <text class="section-title">选择文件</text>
+      <view class="file-upload-area" bindtap="chooseFile">
+        <text class="upload-icon">📁</text>
+        <text class="upload-text">{{selectedFile ? selectedFile.name : '点击选择文件'}}</text>
+        <text class="upload-hint">支持PDF、Word、PPT、视频等格式</text>
+      </view>
+      <text class="file-size-hint" wx:if="{{selectedFile}}">文件大小：{{formatFileSize(selectedFile.size)}}</text>
+    </view>
+
+    <!-- 资料信息填写 -->
+    <view class="info-section">
+      <text class="section-title">资料信息</text>
+      
+      <!-- 资料标题 -->
+      <view class="form-item">
+        <text class="form-label">资料标题 *</text>
+        <input 
+          class="form-input" 
+          placeholder="请输入资料标题" 
+          value="{{materialInfo.title}}" 
+          bindinput="bindInput" 
+          data-field="title"
+        />
+      </view>
+
+      <!-- 资料描述 -->
+      <view class="form-item">
+        <text class="form-label">资料描述</text>
+        <textarea 
+          class="form-textarea" 
+          placeholder="请输入资料描述（可选）" 
+          value="{{materialInfo.description}}" 
+          bindinput="bindInput" 
+          data-field="description"
+          auto-height
+          maxlength="500"
+        />
+        <text class="textarea-count">{{materialInfo.description.length || 0}}/500</text>
+      </view>
+
+      <!-- 资料类型 -->
+      <view class="form-item">
+        <text class="form-label">资料类型 *</text>
+        <view class="type-selector">
+          <block wx:for="{{materialTypes}}" wx:key="value">
+            <view 
+              class="type-item {{materialInfo.type === item.value ? 'active' : ''}}" 
+              bindtap="selectType" 
+              data-type="{{item.value}}"
+            >
+              <text class="type-icon">{{item.icon}}</text>
+              <text class="type-text">{{item.label}}</text>
+            </view>
+          </block>
+        </view>
+      </view>
+
+      <!-- 资料价格 -->
+      <view class="form-item">
+        <text class="form-label">资料价格</text>
+        <view class="price-input-container">
+          <text class="price-symbol">¥</text>
+          <input 
+            class="price-input" 
+            type="number" 
+            placeholder="0" 
+            value="{{materialInfo.price}}" 
+            bindinput="bindInput" 
+            data-field="price"
+            min="0"
+            step="0.1"
+          />
+          <text class="price-hint">设置为0则为免费资料</text>
+        </view>
+      </view>
+
+      <!-- 所属学院 -->
+      <view class="form-item">
+        <text class="form-label">所属学院 *</text>
+        <picker 
+          class="form-picker" 
+          range="{{colleges}}" 
+          value="{{collegeIndex}}" 
+          bindchange="bindCollegeChange"
+        >
+          <view class="picker-text">{{materialInfo.college || '请选择学院'}}</view>
+        </picker>
+      </view>
+
+      <!-- 所属专业 -->
+      <view class="form-item">
+        <text class="form-label">所属专业</text>
+        <picker 
+          class="form-picker" 
+          range="{{currentMajors}}" 
+          value="{{majorIndex}}" 
+          bindchange="bindMajorChange"
+        >
+          <view class="picker-text">{{materialInfo.major || '请选择专业'}}</view>
+        </picker>
+      </view>
+
+      <!-- 学号 -->
+      <view class="form-item">
+        <text class="form-label">学号 *</text>
+        <input 
+          class="form-input" 
+          placeholder="请输入学号" 
+          value="{{materialInfo.studentId}}" 
+          bindinput="bindInput" 
+          data-field="studentId"
+        />
+      </view>
+    </view>
+
+    <!-- 版权承诺区域 -->
+    <view class="copyright-section">
+      <view class="copyright-agree" bindtap="toggleCopyrightAgree">
+        <view class="checkbox {{copyrightAgree ? 'checked' : ''}}">
+          <text class="checkbox-icon" wx:if="{{copyrightAgree}}">✓</text>
+        </view>
+        <text class="copyright-text">
+          我承诺所上传的资料不存在版权问题，若有侵权行为，由我承担全部责任。
+          建议您在上传前自行给资料添加水印（含学号等标识），以保护您的版权。
+        </text>
+      </view>
+    </view>
+
+    <!-- 上传按钮 -->
+    <view class="upload-btn-container">
+      <button 
+        class="upload-btn" 
+        bindtap="uploadMaterial" 
+        disabled="{{!canUpload}}"
+      >
+        {{isUploading ? '上传中...' : '确认上传'}}
+      </button>
+    </view>
+
+    <!-- 底部安全空间 -->
+    <view class="bottom-safe-area"></view>
+  </scroll-view>
+</view>

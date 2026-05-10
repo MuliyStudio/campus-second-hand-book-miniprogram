@@ -1,0 +1,99 @@
+<!-- pages/mine/mine.wxml -->
+<view class="container">
+  <!-- 未登录提示 -->
+  <view class="login-prompt" wx:if="{{!userInfo}}">
+    <view class="login-content">
+      <text class="login-icon">👤</text>
+      <text class="login-text">请先登录</text>
+      <button class="login-btn" bindtap="goToLogin">立即登录</button>
+    </view>
+  </view>
+
+  <view class="mine-content" wx:else>
+    <!-- 顶部通知区域已移除 -->
+
+    <!-- 用户信息卡片 -->
+    <view class="user-card">
+      <view class="user-header">
+        <!-- 用户信息卡片 -->
+        <view class="user-basic-info">
+          <view class="user-avatar" bindtap="goToProfile">
+            <image wx:if="{{userInfo.avatarUrl}}" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+            <view wx:else class="avatar-placeholder">{{userInfo.nickname.charAt(0) || '我'}}</view>
+          </view>
+          
+          <view class="user-main-info">
+            <view class="user-name-row">
+              <text class="user-name">{{userInfo.nickname || '用户'}}</text>
+              <view class="verified-badge" wx:if="{{userInfo.isVerified}}">
+                <text class="verified-icon">✓</text>
+                <text class="verified-text">已认证</text>
+              </view>
+            </view>
+            
+            <view class="user-meta">
+              <view class="meta-item">
+                <text class="meta-label">学号:</text>
+                <text class="meta-value">{{userInfo.studentId || '20230001'}}</text>
+              </view>
+              <view class="meta-item">
+                <text class="meta-label">年级:</text>
+                <text class="meta-value">{{userInfo.grade || 2022}}级</text>
+              </view>
+            </view>
+            
+            <view class="user-tags">
+              <view class="user-tag campus">{{userInfo.campus || '西校区'}}</view>
+              <view class="user-tag dorm" wx:if="{{userInfo.dorm}}">{{userInfo.dorm}}</view>
+              <view class="user-tag college">{{userInfo.college || '计算机学院'}}</view>
+              <view class="user-tag major">{{userInfo.major || '计算机科学与技术'}}</view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 用户简介 -->
+        <view class="user-bio">
+          <text class="bio-text">{{userInfo.bio || '这个人很懒，还没有写个人简介~'}}</text>
+        </view>
+
+
+      </view>
+    </view>
+
+    <!-- 功能菜单 -->
+    <view class="section">
+      <view class="section-header">
+        <text class="section-title">功能菜单</text>
+      </view>
+      
+      <view class="menu-grid">
+        <block wx:for="{{menuItems}}" wx:key="id">
+          <view class="menu-item" bindtap="goToPage" data-id="{{item.id}}">
+            <view class="menu-icon" style="color: {{item.color}}">
+              <text class="icon-text">{{item.icon}}</text>
+            </view>
+            <text class="menu-title">{{item.title}}</text>
+            <text class="menu-desc">{{item.description}}</text>
+          </view>
+        </block>
+      </view>
+    </view>
+
+    <!-- 底部操作区域 -->
+    <view class="action-section">
+      <view class="action-btn share" bindtap="onShareAppMessage">
+        <text class="action-icon">📢</text>
+        <text class="action-text">分享小程序</text>
+      </view>
+      <view class="action-btn logout" bindtap="logout">
+        <text class="action-icon">🚪</text>
+        <text class="action-text">退出登录</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{isLoading}}">
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>

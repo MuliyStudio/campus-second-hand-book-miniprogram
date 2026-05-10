@@ -1,0 +1,265 @@
+/* components/user-info-dialog/user-info-dialog.wxss */
+
+/* 对话框容器 */
+.dialog-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 遮罩层 */
+.dialog-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4rpx);
+}
+
+/* 对话框内容 */
+.dialog-content {
+  position: relative;
+  width: 85%;
+  max-width: 500rpx;
+  background-color: #ffffff;
+  border-radius: 24rpx;
+  box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  animation: dialogSlideIn 0.3s ease-out;
+}
+
+/* 对话框动画 */
+@keyframes dialogSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50rpx) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 头部 */
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx 32rpx 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.dialog-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333333;
+}
+
+.dialog-close {
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.dialog-close:hover {
+  background-color: #e0e0e0;
+  transform: scale(1.1);
+}
+
+.close-icon {
+  font-size: 28rpx;
+  color: #666666;
+  font-weight: 300;
+}
+
+/* 用户信息区域 */
+.user-info-section {
+  padding: 32rpx;
+}
+
+/* 基本信息 */
+.user-basic-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 32rpx;
+}
+
+.user-avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  margin-right: 24rpx;
+  border: 4rpx solid #f0f0f0;
+}
+
+.user-details {
+  flex: 1;
+}
+
+.user-nickname {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.user-uid {
+  font-size: 24rpx;
+  color: #999999;
+}
+
+/* 详细信息区域 */
+.user-details-section {
+  background-color: #f9f9f9;
+  border-radius: 16rpx;
+  padding: 24rpx;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 26rpx;
+  color: #666666;
+}
+
+.info-value {
+  font-size: 26rpx;
+  color: #333333;
+  font-weight: 500;
+}
+
+/* 操作按钮 */
+.dialog-actions {
+  display: flex;
+  padding: 0 32rpx 32rpx;
+  gap: 16rpx;
+}
+
+.action-button {
+  flex: 1;
+  height: 80rpx;
+  border-radius: 40rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 28rpx;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.action-button.primary {
+  background-color: #1890ff;
+  color: #ffffff;
+}
+
+.action-button.primary:hover {
+  background-color: #40a9ff;
+  transform: translateY(-2rpx);
+}
+
+.action-button.secondary {
+  background-color: #f0f0f0;
+  color: #666666;
+}
+
+.action-button.secondary:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-2rpx);
+}
+
+.button-text {
+  font-size: 28rpx;
+}
+
+/* 响应式设计 */
+@media (max-width: 375px) {
+  .dialog-content {
+    width: 90%;
+  }
+  
+  .dialog-header {
+    padding: 24rpx 24rpx 16rpx;
+  }
+  
+  .user-info-section {
+    padding: 24rpx;
+  }
+  
+  .user-avatar {
+    width: 100rpx;
+    height: 100rpx;
+    border-radius: 50rpx;
+  }
+  
+  .user-nickname {
+    font-size: 28rpx;
+  }
+  
+  .info-item {
+    padding: 12rpx 0;
+  }
+  
+  .info-label,
+  .info-value {
+    font-size: 24rpx;
+  }
+  
+  .dialog-actions {
+    padding: 0 24rpx 24rpx;
+  }
+  
+  .action-button {
+    height: 72rpx;
+    border-radius: 36rpx;
+  }
+  
+  .button-text {
+    font-size: 26rpx;
+  }
+}
+
+/* 加载动画 */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40rpx;
+}
+
+.loading-spinner {
+  width: 40rpx;
+  height: 40rpx;
+  border: 4rpx solid #f3f3f3;
+  border-top: 4rpx solid #1890ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

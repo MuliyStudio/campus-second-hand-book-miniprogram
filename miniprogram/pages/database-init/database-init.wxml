@@ -1,0 +1,94 @@
+<!--pages/database-init/database-init.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">数据库初始化</text>
+  </view>
+  
+  <view class="content">
+    <view class="description">
+      <text>此功能用于初始化数据库集合。如果发布书籍功能出现"图片审核服务异常"错误，请先执行初始化。</text>
+    </view>
+    
+    <view class="button-group">
+      <button 
+        class="primary-button" 
+        bindtap="initializeDatabase" 
+        disabled="{{isInitializing}}"
+      >
+        <text class="button-text">
+          {{isInitializing ? '初始化中...' : '初始化数据库'}}
+        </text>
+      </button>
+      
+      <button 
+        class="reset-button" 
+        bindtap="resetPage"
+      >
+        <text class="button-text">重置</text>
+      </button>
+    </view>
+    
+    <view class="result-section">
+      <view class="result-header">
+        <text class="result-title">初始化结果</text>
+      </view>
+      
+      <view class="result-content">
+        <block wx:if="{{initResult}}">
+          <view class="result-item">
+            <text class="result-label">状态:</text>
+            <text class="result-value">{{initResult.success ? '成功' : '失败'}}</text>
+          </view>
+          
+          <view class="result-item">
+            <text class="result-label">消息:</text>
+            <text class="result-value">{{initResult.message}}</text>
+          </view>
+          
+          <view class="result-item" wx:if="{{initResult.collections}}">
+            <text class="result-label">集合统计:</text>
+          </view>
+          
+          <view class="collections-list" wx:if="{{initResult.collections}}">
+            <view class="collection-item">
+              <text class="collection-name">books:</text>
+              <text class="collection-count">{{initResult.collections.books}}</text>
+            </view>
+            
+            <view class="collection-item">
+              <text class="collection-name">audit_logs:</text>
+              <text class="collection-count">{{initResult.collections.audit_logs}}</text>
+            </view>
+            
+            <view class="collection-item">
+              <text class="collection-name">posts:</text>
+              <text class="collection-count">{{initResult.collections.posts}}</text>
+            </view>
+            
+            <view class="collection-item">
+              <text class="collection-name">materials:</text>
+              <text class="collection-count">{{initResult.collections.materials}}</text>
+            </view>
+            
+            <view class="collection-item">
+              <text class="collection-name">orders:</text>
+              <text class="collection-count">{{initResult.collections.orders}}</text>
+            </view>
+            
+            <view class="collection-item">
+              <text class="collection-name">users:</text>
+              <text class="collection-count">{{initResult.collections.users}}</text>
+            </view>
+          </view>
+        </block>
+        
+        <block wx:if="{{initError}}">
+          <view class="error-message">
+            <text class="error-title">错误:</text>
+            <text class="error-text">{{initError}}</text>
+          </view>
+        </block>
+      </view>
+    </view>
+  </view>
+</view>

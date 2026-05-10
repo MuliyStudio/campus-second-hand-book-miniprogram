@@ -1,0 +1,337 @@
+<!-- pages/discover/discover.wxml -->
+<view class="container">
+  <!-- 顶部搜索框 -->
+  <view class="search-section">
+    <view class="search-box">
+      <view class="search-icon">🔍</view>
+      <input 
+        class="search-input" 
+        placeholder="搜索资料名称、课程、作者..." 
+        value="{{searchText}}" 
+        bindinput="onSearchInput"
+        bindconfirm="onSearch"
+      />
+      <view class="search-btn" bindtap="onSearch">搜索</view>
+    </view>
+  </view>
+
+  <!-- 标签切换 -->
+  <view class="tab-bar">
+    <view 
+      class="tab-item {{currentTab === 'rank' ? 'active' : ''}}" 
+      data-tab="rank" 
+      bindtap="switchTab"
+    >
+      <text class="tab-text">📊 排行榜</text>
+    </view>
+    <view 
+      class="tab-item {{currentTab === 'materials' ? 'active' : ''}}" 
+      data-tab="materials" 
+      bindtap="switchTab"
+    >
+      <text class="tab-text">📚 资料库</text>
+    </view>
+    <view 
+      class="tab-item {{currentTab === 'posts' ? 'active' : ''}}" 
+      data-tab="posts" 
+      bindtap="switchTab"
+    >
+      <text class="tab-text">💬 交流区</text>
+    </view>
+  </view>
+
+  <!-- 排行榜内容 -->
+  <scroll-view 
+    scroll-y="true" 
+    class="content-area" 
+    wx:if="{{currentTab === 'rank'}}"
+    refresher-enabled="{{true}}"
+    refresher-triggered="{{isRefreshing}}"
+    bindrefresherrefresh="onRefresh"
+  >
+    <!-- 排行榜头部 -->
+    <view class="rank-header">
+      <text class="rank-title">🔥 热门资料排行榜</text>
+      <text class="rank-subtitle">根据下载量和点赞数综合排名，每日更新</text>
+    </view>
+
+    <!-- 排行榜列表 -->
+    <view class="rank-list">
+      <block wx:for="{{rankList}}" wx:key="_id">
+        <view class="rank-item rank-{{item.rank}}">
+          <!-- 排名标识 -->
+          <view class="rank-number">
+            <text class="rank-digit">{{item.rank}}</text>
+            <view class="rank-trend {{item.trend}}">
+              <text class="trend-icon">
+                {{item.trend === 'up' ? '↑' : item.trend === 'down' ? '↓' : '→'}}
+              </text>
+            </view>
+          </view>
+
+          <!-- 内容信息 -->
+          <view class="rank-content" bindtap="goToMaterialDetail" data-id="{{item._id}}" data-material="{{item}}">
+            <view class="rank-title-row">
+              <text class="material-title">{{item.title}}</text>
+            </view>
+            
+            <view class="rank-meta">
+              <view class="author-info">
+                <image src="{{item.author.avatarUrl}}" class="author-avatar"></image>
+                <text class="author-name">{{item.author.nickname}}</text>
+              </view>
+              
+              <view class="rank-stats">
+                <view class="stat-item">
+                  <text class="stat-icon">⬇️</text>
+                  <text class="stat-count">{{item.downloadCount}}</text>
+                </view>
+                <view class="stat-item" catchtap="favoriteMaterial" data-index="{{index}}">
+                  <text class="stat-icon">{{item.isFavorited ? '❤️' : '🤍'}}</text>
+                  <text class="stat-count">{{item.favoriteCount}}</text>
+                </view>
+              </view>
+            </view>
+            
+            <view class="material-info">
+              <text class="file-size">{{item.fileSize}}</text>
+              <text class="file-divider">·</text>
+              <text class="file-format">{{item.format}}</text>
+            </view>
+          </view>
+
+          <!-- 价格和操作 -->
+          <view class="rank-price-section">
+            <view class="price-tag {{item.isFree ? 'free' : 'paid'}}">
+              <text class="price-text">{{item.isFree ? '免费' : '¥' + item.price}}</text>
+            </view>
+            <view class="download-btn" catchtap="purchaseMaterial" data-index="{{index}}">
+              <text class="download-icon">⬇️</text>
+              <text class="download-text">{{item.isFree ? '下载' : '购买'}}</text>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <!-- 排行榜说明 -->
+    <view class="rank-notice">
+      <text class="notice-title">📝 排行榜说明</text>
+      <text class="notice-content">排行榜根据资料下载量、点赞数、评论数等综合计算，每日更新。优质内容将获得更多曝光机会！</text>
+    </view>
+  </scroll-view>
+
+  <!-- 资料库内容 -->
+  <scroll-view 
+    scroll-y="true" 
+    class="content-area" 
+    wx:if="{{currentTab === 'materials'}}"
+    scroll-with-animation
+    refresher-enabled="{{true}}"
+    refresher-triggered="{{isRefreshing}}"
+    bindrefresherrefresh="onRefresh"
+    bindscrolltolower="loadMoreMaterials"
+  >
+    <!-- 筛选和发布 -->
+    <view class="filter-section">
+      <view class="filter-row">
+        <view class="filter-buttons">
+          <view 
+            class="filter-btn {{selectedType === 'all' ? 'active' : ''}}" 
+            data-type="all" 
+            bindtap="changeTypeFilter"
+          >
+            全部
+          </view>
+          <view 
+            class="filter-btn {{selectedType === 'review' ? 'active' : ''}}" 
+            data-type="review" 
+            bindtap="changeTypeFilter"
+          >
+            复习资料
+          </view>
+          <view 
+            class="filter-btn {{selectedType === 'note' ? 'active' : ''}}" 
+            data-type="note" 
+            bindtap="changeTypeFilter"
+          >
+            笔记
+          </view>
+          <view 
+            class="filter-btn {{selectedType === 'exam' ? 'active' : ''}}" 
+            data-type="exam" 
+            bindtap="changeTypeFilter"
+          >
+            真题
+          </view>
+        </view>
+        <view 
+          class="free-filter {{showFreeOnly ? 'active' : ''}}" 
+          bindtap="toggleFreeFilter"
+        >
+          <text class="free-icon">{{showFreeOnly ? '✓' : '○'}}</text>
+          <text class="free-text">只看免费</text>
+        </view>
+      </view>
+      
+      <!-- 发布按钮 -->
+      <view class="publish-btn" bindtap="goToPublishMaterial">
+        <text class="publish-icon">📤</text>
+        <text class="publish-text">上传资料</text>
+      </view>
+    </view>
+
+    <!-- 资料列表 -->
+    <view class="materials-list">
+      <block wx:for="{{materials}}" wx:key="_id">
+        <view class="material-item">
+          <!-- 资料信息 -->
+          <view class="material-content" bindtap="goToMaterialDetail" data-id="{{item._id}}" data-material="{{item}}">
+            <view class="material-header">
+              <text class="material-title">{{item.title}}</text>
+            </view>
+            
+            <view class="material-meta">
+              <view class="author-info">
+                <image src="{{item.author.avatarUrl}}" class="author-avatar"></image>
+                <text class="author-name">{{item.author.nickname}}</text>
+              </view>
+              
+              <view class="material-stats">
+                <view class="stat-item">
+                  <text class="stat-icon">⬇️</text>
+                  <text class="stat-count">{{item.downloadCount}}</text>
+                </view>
+                <view class="stat-item" catchtap="favoriteMaterial" data-index="{{index}}">
+                  <text class="stat-icon">{{item.isFavorited ? '❤️' : '🤍'}}</text>
+                  <text class="stat-count">{{item.favoriteCount}}</text>
+                </view>
+              </view>
+            </view>
+            
+            <view class="material-details">
+              <text class="file-size">{{item.fileSize}}</text>
+              <text class="file-divider">·</text>
+              <text class="file-format">{{item.format}}</text>
+              <text class="file-divider">·</text>
+              <text class="create-time">{{item.formattedTime || item.createTime}}</text>
+            </view>
+          </view>
+
+          <!-- 价格和操作 -->
+          <view class="material-action">
+            <view class="price-tag {{item.isFree ? 'free' : 'paid'}}">
+              <text class="price-text">{{item.isFree ? '免费' : '¥' + item.price}}</text>
+            </view>
+            <view class="action-btn {{item.isFree ? 'download' : 'buy'}}" catchtap="purchaseMaterial" data-index="{{index}}">
+              <text class="action-icon">{{item.isFree ? '⬇️' : '💰'}}</text>
+              <text class="action-text">{{item.isFree ? '下载' : '购买'}}</text>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{hasMore && !isLoading}}">
+      <text class="load-text">上拉加载更多</text>
+      <view class="load-icon">⬇️</view>
+    </view>
+    
+    <view class="no-more" wx:if="{{!hasMore && materials.length > 0}}">
+      <text>没有更多资料了</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{materials.length === 0 && !isLoading}}">
+      <text class="empty-icon">📚</text>
+      <text class="empty-text">暂无资料</text>
+      <text class="empty-tip">快来上传第一份资料吧</text>
+      <button class="upload-btn" bindtap="goToPublishMaterial">立即上传</button>
+    </view>
+  </scroll-view>
+
+  <!-- 交流区内容 -->
+  <scroll-view 
+    scroll-y="true" 
+    class="content-area" 
+    wx:if="{{currentTab === 'posts'}}"
+    scroll-with-animation
+    refresher-enabled="{{true}}"
+    refresher-triggered="{{isRefreshing}}"
+    bindrefresherrefresh="onRefresh"
+  >
+    <!-- 发布按钮 -->
+    <view class="publish-section">
+      <view class="publish-btn" bindtap="goToPublishPost">
+        <text class="publish-icon">✏️</text>
+        <text class="publish-text">发布帖子</text>
+      </view>
+    </view>
+
+    <!-- 帖子列表 -->
+    <view class="posts-list">
+      <block wx:for="{{posts}}" wx:key="_id">
+        <view class="post-item">
+          <!-- 用户信息 -->
+          <view class="post-header">
+<view class="user-info" catchtap="goToUserProfile" data-id="{{item.author._id}}">
+  <image src="{{item.author.avatarUrl}}" class="user-avatar"></image>
+  <view class="user-line">
+    <text class="user-name">{{item.author.nickname}}</text>
+    <text class="user-college-separator"> · </text>
+    <text class="user-college">{{item.author.college}} {{item.author.major}}</text>
+  </view>
+</view>
+            <text class="post-time">{{item.formattedTime || item.createTime}}</text>
+          </view>
+
+          <!-- 帖子内容 -->
+          <view class="post-content" catchtap="goToPostDetail" data-id="{{item._id}}">
+            <text class="post-title">{{item.title}}</text>
+            <text class="post-text">{{item.content}}</text>
+            
+            <!-- 标签 -->
+            <view class="post-tags">
+              <block wx:for="{{item.tags}}" wx:key="*this">
+                <text class="post-tag">{{item}}</text>
+              </block>
+              <view class="post-type {{item.type}}">{{item.type === 'help' ? '求助' : '分享'}}</view>
+            </view>
+          </view>
+
+          <!-- 帖子操作 -->
+          <view class="post-actions">
+            <view class="action-item {{item.isLiked ? 'liked' : ''}}" catchtap="likePost" data-index="{{index}}">
+              <text class="action-icon">{{item.isLiked ? '❤️' : '🤍'}}</text>
+              <text class="action-count">{{item.likeCount}}</text>
+            </view>
+            
+            <view class="action-item">
+              <text class="action-icon">💬</text>
+              <text class="action-count">{{item.commentCount}}</text>
+            </view>
+            
+            <view class="action-item">
+              <text class="action-icon">👁️</text>
+              <text class="action-count">{{item.viewCount}}</text>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{posts.length === 0 && !isLoading}}">
+      <text class="empty-icon">💬</text>
+      <text class="empty-text">暂无帖子</text>
+      <text class="empty-tip">快来发布第一个帖子吧</text>
+      <button class="publish-post-btn" bindtap="goToPublishPost">立即发布</button>
+    </view>
+  </scroll-view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{isLoading}}">
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>

@@ -1,0 +1,174 @@
+<!-- pages/my-upload/my-upload.wxml -->
+<view class="container">
+  <!-- 顶部导航 -->
+  <view class="header">
+    <view class="header-title">我的上传</view>
+  </view>
+
+  <!-- 类型切换 -->
+  <view class="type-tabs">
+    <view 
+      class="tab-item {{activeTab === 'book' ? 'active' : ''}}" 
+      bindtap="switchTab" 
+      data-tab="book"
+    >
+      <text>二手书籍</text>
+    </view>
+    <view 
+      class="tab-item {{activeTab === 'material' ? 'active' : ''}}" 
+      bindtap="switchTab" 
+      data-tab="material"
+    >
+      <text>学习资料</text>
+    </view>
+  </view>
+
+  <!-- 发布新内容按钮 -->
+  <view class="publish-btn" bindtap="goToPublish">
+    <view class="btn-icon">+</view>
+    <view class="btn-text">{{activeTab === 'book' ? '发布新书籍' : '发布新资料'}}</view>
+  </view>
+
+  <!-- 书籍列表 -->
+  <view class="content-section" wx:if="{{activeTab === 'book'}}">
+
+    <!-- 书籍列表 -->
+    <view class="list-container">
+      <view class="loading" wx:if="{{loading}}">
+        <text>加载中...</text>
+      </view>
+
+      <view class="empty" wx:if="{{!loading && books.length === 0}}">
+        <view class="empty-icon">📚</view>
+        <view class="empty-text">暂无发布的书籍</view>
+        <view class="empty-btn" bindtap="goToPublish">
+          <text>发布新书籍</text>
+        </view>
+      </view>
+
+      <view class="book-list" wx:if="{{!loading && books.length > 0}}">
+        <block wx:for="{{books}}" wx:key="_id">
+          <view class="book-item" bindtap="goToBookDetail" data-id="{{item._id}}">
+            <view class="book-header">
+              <view class="book-title">{{item.title}}</view>
+              <view class="book-status {{item.status === 'sold' ? 'sold' : (item.status === 'reserved' ? 'reserved' : (item.status === 'offline' ? 'offline' : ''))}}">{{item.status === 'sold' ? '已售出' : (item.status === 'reserved' ? '预定中' : (item.status === 'offline' ? '已下架' : '在售'))}}</view>
+            </view>
+            
+            <view class="book-info">
+              <view class="info-row">
+                <text class="author">{{item.author}}</text>
+                <text class="divider">·</text>
+                <text class="publisher">{{item.publisher}}</text>
+              </view>
+              
+              <view class="info-row">
+                <text class="views">{{item.viewCount || item.views || 0}}浏览</text>
+                <text class="favorites">{{item.favoriteCount || 0}}收藏</text>
+                <text class="date">{{formatDate(item.createTime)}}</text>
+              </view>
+            </view>
+
+            <view class="book-actions">
+              <view 
+                class="action-btn edit" 
+                catchtap="editBook" 
+                data-id="{{item._id}}"
+                wx:if="{{item.status !== 'sold'}}"
+              >
+                <text>编辑</text>
+              </view>
+              <view 
+                class="action-btn {{item.status === 'offline' ? 'online' : 'offline'}}" 
+                catchtap="toggleBookStatus" 
+                data-id="{{item._id}}"
+                data-status="{{item.status}}"
+                wx:if="{{item.status !== 'sold'}}"
+              >
+                <text>{{item.status === 'offline' ? '上架' : '下架'}}</text>
+              </view>
+              <view 
+                class="action-btn delete" 
+                catchtap="deleteBook" 
+                data-id="{{item._id}}"
+              >
+                <text>删除</text>
+              </view>
+            </view>
+          </view>
+        </block>
+      </view>
+    </view>
+  </view>
+
+  <!-- 资料列表 -->
+  <view class="content-section" wx:if="{{activeTab === 'material'}}">
+    <view class="list-container">
+      <view class="loading" wx:if="{{loading}}">
+        <text>加载中...</text>
+      </view>
+
+      <view class="empty" wx:if="{{!loading && materials.length === 0}}">
+        <view class="empty-icon">📁</view>
+        <view class="empty-text">暂无上传的资料</view>
+        <view class="empty-btn" bindtap="goToPublish">
+          <text>上传新资料</text>
+        </view>
+      </view>
+
+      <view class="material-list" wx:if="{{!loading && materials.length > 0}}">
+        <block wx:for="{{materials}}" wx:key="_id">
+          <view class="material-item" bindtap="goToMaterialDetail" data-id="{{item._id}}">
+            <view class="material-header">
+              <view class="material-title">{{item.title}}</view>
+              <view class="material-type">{{item.type === 'PDF' ? 'pdf' : item.type}}</view>
+            </view>
+            
+            <view class="material-info">
+              <view class="info-row">
+                <view class="size-tag">{{item.fileSize}}</view>
+                <view class="price-tag" wx:if="{{item.price > 0}}">¥{{item.price}}</view>
+                <view class="free-tag" wx:else>免费</view>
+              </view>
+              
+              <view class="info-row">
+                <text class="downloads">{{item.downloadCount || 0}}下载</text>
+                <text class="favorites">{{item.favoriteCount || 0}}收藏</text>
+              </view>
+              
+              <view class="info-row">
+                <text class="date">{{formatDate(item.createTime)}}</text>
+              </view>
+            </view>
+
+            <view class="material-actions">
+              <view 
+                class="action-btn edit" 
+                catchtap="editMaterial" 
+                data-id="{{item._id}}"
+                wx:if="{{item.status !== 'sold'}}"
+              >
+                <text>编辑</text>
+              </view>
+              <view 
+                class="action-btn {{item.status === 'offline' ? 'online' : 'offline'}}" 
+                catchtap="toggleMaterialStatus" 
+                data-id="{{item._id}}"
+                data-status="{{item.status}}"
+                wx:if="{{item.status !== 'sold'}}"
+              >
+                <text>{{item.status === 'offline' ? '上架' : '下架'}}</text>
+              </view>
+              <view 
+                class="action-btn delete" 
+                catchtap="deleteMaterial" 
+                data-id="{{item._id}}"
+              >
+                <text>删除</text>
+              </view>
+            </view>
+          </view>
+        </block>
+      </view>
+    </view>
+  </view>
+</view>
