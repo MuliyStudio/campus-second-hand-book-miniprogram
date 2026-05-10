@@ -1,0 +1,29 @@
+# Node modules
+**/node_modules/
+
+# Workbuddy
+.workbuddy/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Build output
+*.map
+
+# Database JSON (may contain sensitive data)
+# 如果用户希望保留示例数据，可以去掉下面的注释
+# books.json
+# users.json
+# *.json
+
+# Temporary files
+*.tmp
+*.temp
