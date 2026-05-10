@@ -18,12 +18,35 @@ Thumbs.db
 # Build output
 *.map
 
-# Database JSON (may contain sensitive data)
-# 如果用户希望保留示例数据，可以去掉下面的注释
-# books.json
-# users.json
-# *.json
+# ========== 敏感数据文件 ==========
+# 数据库 JSON 数据文件（含真实用户数据，切勿上传）
+audit_logs.json
+book_orders.json
+books.json
+chat_messages.json
+comments.json
+conversations.json
+database_post.json
+favorites.json
+likes.json
+material_orders.json
+materials.json
+messages.json
+notices.json
+posts.json
+ratings.json
+reports.json
+user.json
+users.json
+个人消息.json
+书籍.json
+书籍订单.json
+帖子.json
+收藏.json
+用户.json
+系统消息.json
+资料.json
+资料订单.json
 
-# Temporary files
-*.tmp
-*.temp
+# 环境配置
+.cloudbase/

@@ -1,0 +1,1 @@
+{"_id":"example_id","_openid":"example_openid","itemId":"example_item_id","type":"book","itemData":{"price":20,"size":"2.00 MB","title":"示例资料","type":"pdf","uploaderName":"示例上传者","format":"PDF","fileSize":"2.00 MB"},"createTime":{"$date":"2024-01-01T00:00:00.000Z"},"status":"active"}
